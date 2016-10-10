@@ -1,5 +1,9 @@
 package models
 
-class Transaction {
+import java.util.Date
 
-}
+case class Transaction(
+  date: Date,
+  description: String,
+  amount: Double
+)
