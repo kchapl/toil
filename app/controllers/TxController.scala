@@ -10,9 +10,9 @@ class TxController extends Controller {
   private val txPath = Properties.envOrNone("TX_PATH")
 
   def viewTransactions() = Action {
-    txPath map { p =>
-      TxImporter.importTransactions(p)
-      Ok
+    txPath map { path =>
+      val transactions = TxImporter.importTransactions(path)
+      Ok(views.html.transactions(transactions))
     } getOrElse {
       InternalServerError("Missing property 'TX_PATH'")
     }

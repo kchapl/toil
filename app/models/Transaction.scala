@@ -1,9 +1,11 @@
 package models
 
-import java.util.Date
+import java.time.LocalDate
 
 case class Transaction(
-  date: Date,
-  description: String,
+  date: LocalDate,
+  payee: String,
+  reference: Option[String],
+  mode: String,
   amount: Double
 )

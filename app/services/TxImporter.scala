@@ -1,44 +1,30 @@
 package services
 
-import java.io.File
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-import models.Transaction
-import org.apache.pdfbox.io.RandomAccessFile
-import org.apache.pdfbox.pdfparser.PDFParser
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.text.PDFTextStripper
-import scala.collection.JavaConverters._
+import models.{Csv, Transaction}
+
+import scala.io.Source
 
 object TxImporter {
 
-  def importTransactions(path: String): Seq[Transaction] = {
+  private val dateFormatter = DateTimeFormatter.ofPattern("dd'/'MM'/'yyyy")
 
-    val parser = new PDFParser(new RandomAccessFile(new File(path), "r"))
-    parser.parse()
+  def importTransactions(path: String): Seq[Transaction] = Source.fromFile(path).getLines().toSeq map parseLine
 
-    val cosDoc = parser.getDocument
-
-    val pdDoc = new PDDocument(cosDoc)
-//    pdDoc.getDocumentCatalog.getDocumentOutline.toString
-
-    val pages = pdDoc.getPages
-
-    val page = pages.get(0)
-
-    val entrySet = page.getCOSObject.entrySet()
-//    entrySet.asScala.seq.foreach{k => println(s"${k.getKey.getName} = ${k.getValue.getCOSObject}")}
-
-    val pdfStripper = new PDFTextStripper()
-    pdfStripper.setStartPage(1)
-    pdfStripper.setEndPage(pdDoc.getNumberOfPages)
-    pdfStripper.setLineSeparator("\n\n")
-
-    val text = pdfStripper.getText(pdDoc)
-
-    println("--- start ---")
-    println(text)
-    println("--- end ---")
-
-    Nil
+  def parseLine(line: String): Transaction = {
+    val parsed = Csv.parse(line.replaceAll("[^ -~]", ""))
+    val description = parsed(1).split("\\s{2,}")
+    Transaction(
+      date = LocalDate.parse(parsed.head, dateFormatter),
+      payee = description.head,
+      reference = {
+        if (description.length > 2) Some(description.drop(1).dropRight(1).mkString(" "))
+        else None
+      },
+      mode = description.last,
+      amount = parsed.last.replaceFirst(",", "").toDouble
+    )
   }
 }
