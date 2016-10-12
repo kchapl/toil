@@ -1,1 +1,3 @@
-GET /transactions controllers.TxController.viewTransactions
+GET /transactions   controllers.TxController.viewTransactions
+
+GET /oauth2callback controllers.AuthController.authCallback(code)

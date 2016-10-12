@@ -1,0 +1,24 @@
+@(transactions: Seq[Transaction])
+<html>
+<head></head>
+<body>
+    <table>
+        <tr>
+            <td>Date</td>
+            <td>Payee</td>
+            <td>Reference</td>
+            <td>Mode</td>
+            <td>Amount</td>
+        </tr>
+        @for(tx <- transactions) {
+            <tr>
+                <td>@tx.date</td>
+                <td>@tx.payee</td>
+                <td>@tx.reference</td>
+                <td>@tx.mode</td>
+                <td>@tx.amount</td>
+            </tr>
+        }
+    </table>
+</body>
+</html>
