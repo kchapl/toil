@@ -1,1 +1,1 @@
-GET /transactions controllers.TransactionController.viewTransactions
+GET /transactions controllers.TxController.viewTransactions
