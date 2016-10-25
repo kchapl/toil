@@ -1,17 +1,26 @@
 package controllers
 
-import play.api.mvc.{Action, Controller}
-import services.TxImporter
+import javax.inject.Inject
 
-import scala.util.Properties
+import models.Config.txPath
+import models.{Config, TxParser}
+import play.api.libs.ws.WSClient
+import play.api.mvc.Controller
+import services.{GoogleSheet, TxImporter}
 
-class TxController extends Controller {
+import scala.concurrent.ExecutionContext
+import models.TxParser
 
-  private val txPath = Properties.envOrNone("TX_PATH")
+class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext) extends Controller with Security {
 
-  def viewTransactions() = Action {
+  def viewTransactions() = AuthorizedAction { implicit request =>
+    Ok(views.html.transactions(Nil))
+  }
+
+  def uploadTransactions() = AuthorizedAction { implicit request =>
     txPath map { path =>
-      val transactions = TxImporter.importTransactions(path)
+      val lines = TxImporter.importTransactions(path)
+      val transactions = lines map TxParser.parseLine
       Ok(views.html.transactions(transactions))
     } getOrElse {
       InternalServerError("Missing property 'TX_PATH'")
