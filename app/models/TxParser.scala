@@ -7,10 +7,11 @@ object TxParser {
 
   private val dateFormatter = DateTimeFormatter.ofPattern("dd'/'MM'/'yyyy")
 
-  def parseLine(line: String): Transaction = {
+  def parseLine(account: String)(line: String): Transaction = {
     val parsed = Csv.parse(line.replaceAll("[^ -~]", ""))
     val description = parsed(1).split("\\s{2,}")
     Transaction(
+      account,
       date = LocalDate.parse(parsed.head, dateFormatter),
       payee = description.head,
       reference = {
