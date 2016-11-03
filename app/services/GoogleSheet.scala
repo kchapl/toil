@@ -32,10 +32,14 @@ object GoogleSheet {
       .withHeaders("Authorization" -> s"Bearer $accessToken")
       .get().map { response =>
 
-      val JsDefined(JsArray(jsonRows)) = response.json \ "values"
       response.status match {
         case OK =>
-          Right(toRows(jsonRows))
+          response.json \ "values" match {
+            case JsDefined(JsArray(jsonRows)) =>
+              Right(toRows(jsonRows))
+            case _ =>
+              Right(Nil)
+          }
         case _ =>
           Left(ServiceException(response.status, response.statusText))
       }
