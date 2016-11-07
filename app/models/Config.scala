@@ -15,3 +15,4 @@ object Config {
   val clientSecret = URLEncoder.encode(Config.plainClientSecret.get, "UTF-8")
   val redirectUri = Config.plainRedirectUri.get
 }
+

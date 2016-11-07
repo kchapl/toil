@@ -1,3 +1,10 @@
 GET        /transactions          controllers.TxController.viewTransactions
+POST       /transactions          controllers.TxController.uploadTransactions
 
 GET        /oauth2callback        controllers.AuthController.authCallback(code,state)
+
+
+
+
+
+GET       /transactionsuploadtest          controllers.TxController.uploadTransactions

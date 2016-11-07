@@ -20,8 +20,13 @@ trait Security {
     request.session.get("accessToken")
 
   def onUnauthorized[A](request: Request[A]): Result = {
+    // todo: use this initially and then extend to write access
+//    val scope = URLEncoder.encode(
+//      "https://www.googleapis.com/auth/spreadsheets.readonly",
+//      utf_8.charset
+//    )
     val scope = URLEncoder.encode(
-      "https://www.googleapis.com/auth/spreadsheets.readonly",
+      "https://www.googleapis.com/auth/spreadsheets",
       utf_8.charset
     )
     val securityToken = new BigInteger(130, new SecureRandom()).toString(32)
