@@ -7,7 +7,7 @@ import play.api.libs.ws.WSClient
 import play.api.mvc.Controller
 import services.GoogleSheet
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
 
 class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
@@ -18,7 +18,7 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
       ws,
       request.accessToken,
       Config.sheetFileId.get,
-      "a1:f5"
+      "a:f"
     ) map {
       case Left(msg) =>
         InternalServerError(s"$msg")
@@ -30,17 +30,29 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
 
   def uploadTransactions() = AuthorizedAction.async { implicit request =>
 
-    val transactions =
-      Source.fromFile(Config.txPath.get).getLines().toSeq map
+    val transactionsToAppend =
+      Source.fromFile(Config.txPath.get).getLines().toSet map
         TxParser.parseLine("acc")
 
-    val x = GoogleSheet.appendValues(
-      ws,
-      request.accessToken,
-      Config.sheetFileId.get,
-      range = "a1:f5",
-      values = transactions map Transaction.toRow
-    )
+    val transactionsAlready = GoogleSheet.getValues(ws,request.accessToken,Config.sheetFileId.get,"a:f")
+
+    val x = transactionsAlready map {
+      case Left(msg) =>
+        val w = Left(Future.successful(msg))
+        w
+      case Right(r) =>
+        val deduped = transactionsToAppend -- (r map Transaction.fromRow)
+
+        val y = GoogleSheet.appendValues(
+          ws,
+          request.accessToken,
+          Config.sheetFileId.get,
+          range = "a:f",
+          values = deduped map Transaction.toRow
+        )
+        val z = Right(y)
+        z
+    }
 
     x map {
       case Left(msg) =>
