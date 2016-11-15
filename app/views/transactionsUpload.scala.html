@@ -1,0 +1,8 @@
+@helper.form(action = routes.TxController.uploadTransactions, 'enctype -> "multipart/form-data") {
+    <input type="text" name="account"/>
+    <br />
+    <input type="file" name="transactions"/>
+    <p>
+        <input type="submit">
+    </p>
+}

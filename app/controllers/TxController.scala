@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import models.{Config, Transaction, TxParser}
 import play.api.libs.ws.WSClient
-import play.api.mvc.Controller
+import play.api.mvc.{Action, Controller}
 import services.GoogleSheet
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -13,7 +13,7 @@ import scala.io.Source
 class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
   extends Controller with Security {
 
-  def viewTransactions() = AuthorizedAction.async { implicit request =>
+  def viewTransactions = AuthorizedAction.async { implicit request =>
     GoogleSheet.getValues(
       ws,
       request.accessToken,
@@ -28,37 +28,52 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
     }
   }
 
-  def uploadTransactions() = AuthorizedAction.async { implicit request =>
+  def uploadTransactions = AuthorizedAction.async(parse.multipartFormData) { implicit request =>
+    request.body.file("transactions").map { transactions =>
 
-    val transactionsToAppend =
-      Source.fromFile(Config.txPath.get).getLines().toSet map
-        TxParser.parseLine("acc")
+      val acc = request.body.dataParts("account").head
 
-    val transactionsAlready = GoogleSheet.getValues(ws,request.accessToken,Config.sheetFileId.get,"a:f")
+      val transactionsToAppend =
+        Source.fromFile(transactions.ref.file).getLines().toSet map
+          TxParser.parseLine(acc)
 
-    val x = transactionsAlready map {
-      case Left(msg) =>
-        val w = Left(Future.successful(msg))
-        w
-      case Right(r) =>
-        val deduped = transactionsToAppend -- (r map Transaction.fromRow)
+      val transactionsAlready = GoogleSheet.getValues(
+        ws,
+        request.accessToken,
+        Config.sheetFileId.get,
+        "a:f"
+      )
 
-        val y = GoogleSheet.appendValues(
-          ws,
-          request.accessToken,
-          Config.sheetFileId.get,
-          range = "a:f",
-          values = deduped map Transaction.toRow
-        )
-        val z = Right(y)
-        z
+      val x = transactionsAlready map {
+        case Left(msg) =>
+          val w = Left(Future.successful(msg))
+          w
+        case Right(r) =>
+          val deduped = transactionsToAppend -- (r map Transaction.fromRow)
+
+          val y = GoogleSheet.appendValues(
+            ws,
+            request.accessToken,
+            Config.sheetFileId.get,
+            range = "a:f",
+            values = deduped map Transaction.toRow
+          )
+          val z = Right(y)
+          z
+      }
+
+      x map {
+        case Left(msg) =>
+          InternalServerError(s"$msg")
+        case Right(_) =>
+          Redirect(routes.TxController.viewTransactions())
+      }
+    } getOrElse {
+      Future.successful(Ok("File upload failed"))
     }
+  }
 
-    x map {
-      case Left(msg) =>
-        InternalServerError(s"$msg")
-      case Right(_) =>
-        Redirect(routes.TxController.viewTransactions())
-    }
+  def viewUploadTransactions() = Action {
+    Ok(views.html.transactionsUpload())
   }
 }
