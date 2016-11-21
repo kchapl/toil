@@ -1,8 +1,6 @@
 package services
 
-import java.net.URLEncoder
-
-import models.Row
+import models.{Row, SheetRange}
 import play.api.http.Status.OK
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest}
@@ -32,7 +30,7 @@ object GoogleSheet {
     ws: WSClient,
     accessToken: String,
     sheetFileId: String,
-    range: String
+    range: SheetRange
   ): Future[Either[String, Seq[Row]]] = {
 
     def toRows(values: Seq[JsValue]): Seq[Row] =
@@ -49,7 +47,7 @@ object GoogleSheet {
         }
       )
 
-    mkRequest(ws, accessToken, sheetFileId, range).get().map { response =>
+    mkRequest(ws, accessToken, sheetFileId, range.urlEncodedSelector).get().map { response =>
 
       // todo: turn into service exception and log in controller
       println(response.body)
@@ -76,7 +74,7 @@ object GoogleSheet {
     ws: WSClient,
     accessToken: String,
     sheetFileId: String,
-    range: String,
+    range: SheetRange,
     values: Set[Row]
   ): Future[Either[String, Unit]] = {
 
@@ -94,7 +92,7 @@ object GoogleSheet {
     val valuesToJson =
       JsObject(Seq("values" -> JsArray(values.toSeq map rowToJson)))
 
-    val suffix = s"${ URLEncoder.encode(range, utf_8.charset) }:append?valueInputOption=raw"
+    val suffix = s"${ range.urlEncodedSelector }:append?valueInputOption=raw"
     mkRequest(ws, accessToken, sheetFileId, suffix)
       .post(valuesToJson).map { response =>
 

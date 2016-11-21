@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import models.{Config, Row, Transaction, TxParser}
+import models._
 import play.api.libs.ws.WSClient
 import play.api.mvc.Controller
 import services.GoogleSheet
@@ -18,7 +18,7 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
       ws,
       request.accessToken,
       Config.sheetFileId.get,
-      "a:f"
+      SheetRange("Transactions", "A", "F")
     ) map {
       case Left(msg) =>
         InternalServerError(s"$msg")
@@ -41,7 +41,7 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
         ws,
         request.accessToken,
         Config.sheetFileId.get,
-        "a:f"
+        SheetRange("Transactions", "A", "F")
       )
 
       val x = transactionsAlready map {
@@ -55,7 +55,7 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
             ws,
             request.accessToken,
             Config.sheetFileId.get,
-            range = "a:f",
+            range = SheetRange("Transactions", "A", "F"),
             values = deduped map Row.fromTransaction
           )
           val z = Right(y)
