@@ -73,7 +73,7 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
     }
   }
 
-  def viewUploadTransactions() = Action {
+  def viewUploadTransactions() = AuthorizedAction {
     Ok(views.html.transactionsUpload())
   }
 }
