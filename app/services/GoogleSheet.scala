@@ -75,7 +75,7 @@ object GoogleSheet {
     accessToken: String,
     sheetFileId: String,
     range: SheetRange,
-    values: Set[Row]
+    values: Seq[Row]
   ): Future[Either[String, Unit]] = {
 
     def rowToJson(row: Row) = JsArray(
@@ -90,7 +90,7 @@ object GoogleSheet {
     )
 
     val valuesToJson =
-      JsObject(Seq("values" -> JsArray(values.toSeq map rowToJson)))
+      JsObject(Seq("values" -> JsArray(values map rowToJson)))
 
     val suffix = s"${ range.urlEncodedSelector }:append?valueInputOption=raw"
     mkRequest(ws, accessToken, sheetFileId, suffix)

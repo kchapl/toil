@@ -56,7 +56,7 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
             request.accessToken,
             Config.sheetFileId.get,
             range = SheetRange("Transactions", "A", "F"),
-            values = deduped map Row.fromTransaction
+            values = (deduped map Row.fromTransaction).toSeq
           )
           val z = Right(y)
           z
