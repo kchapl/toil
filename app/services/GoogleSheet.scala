@@ -2,6 +2,7 @@ package services
 
 import java.net.URLEncoder
 
+import models.Row
 import play.api.http.Status.OK
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest}
@@ -11,8 +12,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object GoogleSheet {
-
-  case class Row(values: Seq[String])
 
   private def mkRequest(
     ws: WSClient,

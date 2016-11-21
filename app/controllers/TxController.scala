@@ -2,9 +2,9 @@ package controllers
 
 import javax.inject.Inject
 
-import models.{Config, Transaction, TxParser}
+import models.{Config, Row, Transaction, TxParser}
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
 import services.GoogleSheet
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,7 +56,7 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
             request.accessToken,
             Config.sheetFileId.get,
             range = "a:f",
-            values = deduped map Transaction.toRow
+            values = deduped map Row.fromTransaction
           )
           val z = Right(y)
           z
