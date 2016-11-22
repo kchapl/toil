@@ -24,5 +24,8 @@ object Transaction {
     amount = row.values(5).toDouble
   )
 
-  def append(): Future[Either[String, Unit]] = ???
+  def append(txToAppend: Set[Transaction], txAlready: Set[Transaction])
+    (f: Set[Transaction] => Future[Either[String, Unit]]): Future[Either[String, Unit]] = {
+    f(txToAppend -- txAlready)
+  }
 }

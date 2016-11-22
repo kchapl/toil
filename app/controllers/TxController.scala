@@ -31,43 +31,46 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
   def uploadTransactions = AuthorizedAction.async(parse.multipartFormData) { implicit request =>
     request.body.file("transactions").map { transactions =>
 
-      val acc = request.body.dataParts("account").head
+      val range = SheetRange("Transactions", fromColumn = "A", toColumn = "F")
 
-      val transactionsToAppend =
-        Source.fromFile(transactions.ref.file).getLines().toSet map
-          TxParser.parseLine(acc)
+      def appended(txAlready: Set[Transaction]): Future[Either[String, Unit]] = {
 
-      val transactionsAlready = GoogleSheet.getValues(
-        ws,
-        request.accessToken,
-        Config.sheetFileId.get,
-        SheetRange("Transactions", "A", "F")
-      )
+        val acc = request.body.dataParts("account").head
 
-      val x = transactionsAlready map {
-        case Left(msg) =>
-          val w = Left(Future.successful(msg))
-          w
-        case Right(r) =>
-          val deduped = transactionsToAppend -- (r map Transaction.fromRow)
+        val txToAppend =
+          Source.fromFile(transactions.ref.file).getLines().toSet map TxParser.parseLine(acc)
 
-          val y = GoogleSheet.appendValues(
+        Transaction.append(txToAppend, txAlready) { txs =>
+          GoogleSheet.appendValues(
             ws,
             request.accessToken,
             Config.sheetFileId.get,
-            range = SheetRange("Transactions", "A", "F"),
-            values = (deduped map Row.fromTransaction).toSeq
+            range,
+            values = txs.map(Row.fromTransaction).toSeq
           )
-          val z = Right(y)
-          z
+        }
       }
 
-      x map {
-        case Left(msg) =>
-          InternalServerError(s"$msg")
-        case Right(_) =>
-          Redirect(routes.TxController.viewTransactions())
+      val result: Future[Either[String, Unit]] = {
+
+        val txAlready = GoogleSheet.getValues(
+          ws,
+          request.accessToken,
+          Config.sheetFileId.get,
+          range
+        )
+
+        txAlready flatMap {
+          case Left(msg) => Future.successful(Left(msg))
+          case Right(rows) => appended(rows.map(Transaction.fromRow).toSet)
+        }
       }
+
+      result map {
+        case Left(msg) => InternalServerError(msg)
+        case Right(_) => Redirect(routes.TxController.viewTransactions())
+      }
+
     } getOrElse {
       Future.successful(Ok("File upload failed"))
     }
