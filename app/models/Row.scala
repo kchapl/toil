@@ -10,7 +10,7 @@ object Row {
       tx.date.toString,
       tx.payee,
       tx.reference getOrElse "",
-      tx.mode,
+      tx.mode getOrElse "",
       tx.amount.toString
     )
   )

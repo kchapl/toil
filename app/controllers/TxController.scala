@@ -37,8 +37,13 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
 
         val acc = request.body.dataParts("account").head
 
-        val txToAppend =
-          Source.fromFile(transactions.ref.file).getLines().toSet map TxParser.parseLine(acc)
+        val txToAppend = {
+          def parse(line: String) = acc match {
+            case "HongCurr" => TxParser.parseHongCurrLine(acc)(line)
+            case "HongCredit" => TxParser.parseHongCreditLine(acc)(line)
+          }
+          Source.fromFile(transactions.ref.file).getLines().toSet map parse
+        }
 
         Transaction.append(txToAppend, txAlready) { txs =>
           GoogleSheet.appendValues(

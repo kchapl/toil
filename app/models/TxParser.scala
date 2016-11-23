@@ -7,19 +7,46 @@ object TxParser {
 
   private val dateFormatter = DateTimeFormatter.ofPattern("dd'/'MM'/'yyyy")
 
-  def parseLine(account: String)(line: String): Transaction = {
-    val parsed = Csv.parse(line.replaceAll("[^ -~]", ""))
-    val description = parsed(1).split("\\s{2,}")
+  private def stripUnprintableChars(s: String) = s.replaceAll("[^ -~]", "")
+
+  def parseLine(account: String)(
+    line: String,
+    payeeFrom: Seq[String] => String,
+    referenceFrom: Seq[String] => Option[String],
+    modeFrom: Seq[String] => Option[String]
+  ): Transaction = {
+    val parsed = Csv.parse(stripUnprintableChars(line))
     Transaction(
       account,
       date = LocalDate.parse(parsed.head, dateFormatter),
-      payee = description.head,
-      reference = {
-        if (description.length > 2) Some(description.drop(1).dropRight(1).mkString(" "))
+      payee = payeeFrom(parsed).trim,
+      reference = referenceFrom(parsed).map(_.trim),
+      mode = modeFrom(parsed).map(_.trim),
+      amount = parsed.last.replaceFirst(",", "").toDouble
+    )
+  }
+
+  def parseHongCurrLine(account: String)(line: String): Transaction = {
+    def description(parsed: Seq[String]) = parsed(1).split("\\s{2,}")
+    parseLine(account)(
+      line,
+      payeeFrom = { parsed => description(parsed).head },
+      referenceFrom = { parsed =>
+        val desc = description(parsed)
+        if (desc.length > 2) Some(desc.drop(1).dropRight(1).mkString(" "))
         else None
       },
-      mode = description.last,
-      amount = parsed.last.replaceFirst(",", "").toDouble
+      modeFrom = { parsed => Some(description(parsed).last) }
+    )
+  }
+
+  def parseHongCreditLine(account: String)(line: String): Transaction = {
+    def description(parsed: Seq[String]) = parsed(1).splitAt(22)
+    parseLine(account)(
+      line,
+      payeeFrom = { parsed => description(parsed)._1 },
+      referenceFrom = { parsed => Some(description(parsed)._2) },
+      modeFrom = { _ => None }
     )
   }
 }
