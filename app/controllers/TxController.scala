@@ -23,7 +23,7 @@ class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
       case Left(msg) =>
         InternalServerError(s"$msg")
       case Right(rows) =>
-        val transactions = rows map Transaction.fromRow
+        val transactions = Organizer.organize(rows.map(Transaction.fromRow), request.queryString)
         Ok(views.html.transactions(transactions))
     }
   }

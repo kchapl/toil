@@ -4,6 +4,7 @@
 <body>
     <table>
         <tr>
+            <td>Account</td>
             <td>Date</td>
             <td>Payee</td>
             <td>Reference</td>
@@ -12,6 +13,7 @@
         </tr>
         @for(tx <- transactions) {
             <tr>
+                <td>@tx.account</td>
                 <td>@tx.date</td>
                 <td>@tx.payee</td>
                 <td>@tx.reference</td>
