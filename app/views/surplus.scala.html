@@ -1,0 +1,26 @@
+@(surpluses: Seq[Surplus])
+<html>
+    <head></head>
+    <body>
+        <table>
+            <tr>
+                <td>Y</td>
+                <td>M</td>
+                <td>I</td>
+                <td>S</td>
+                <td>T</td>
+                <td>D</td>
+            </tr>
+            @for(s <- surpluses) {
+                <tr>
+                    <td>@s.year</td>
+                    <td>@s.month</td>
+                    <td>@("%.2f".format(s.income))</td>
+                    <td>@s.spend</td>
+                    <td>@s.transfers</td>
+                    <td>@s.surplus</td>
+                </tr>
+            }
+        </table>
+    </body>
+</html>

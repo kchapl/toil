@@ -1,6 +1,7 @@
 GET         /oauth2callback             controllers.AuthController.authCallback(code,state)
 
 GET         /transactions               controllers.TxController.viewTransactions()
-
 GET         /transactions/upload        controllers.TxController.viewUploadTransactions()
 POST        /transactions/upload        controllers.TxController.uploadTransactions()
+
+GET         /surplus                    controllers.SurplusController.viewSurplus()

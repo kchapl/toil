@@ -1,0 +1,69 @@
+@(income: Seq[Transaction], spend: Seq[Transaction], transfers: Seq[Transaction])
+<html>
+<head></head>
+<body>
+    <p>I</p>
+    <table>
+        <tr>
+            <td>Account</td>
+            <td>Date</td>
+            <td>Payee</td>
+            <td>Reference</td>
+            <td>Mode</td>
+            <td>Amount</td>
+        </tr>
+        @for(tx <- income) {
+            <tr>
+                <td>@tx.account</td>
+                <td>@tx.date</td>
+                <td>@tx.payee</td>
+                <td>@tx.reference</td>
+                <td>@tx.mode</td>
+                <td>@tx.amount</td>
+            </tr>
+        }
+    </table>
+    <p>S</p>
+    <table>
+        <tr>
+            <td>Account</td>
+            <td>Date</td>
+            <td>Payee</td>
+            <td>Reference</td>
+            <td>Mode</td>
+            <td>Amount</td>
+        </tr>
+        @for(tx <- spend) {
+            <tr>
+                <td>@tx.account</td>
+                <td>@tx.date</td>
+                <td>@tx.payee</td>
+                <td>@tx.reference</td>
+                <td>@tx.mode</td>
+                <td>@tx.amount</td>
+            </tr>
+        }
+    </table>
+    <p>T</p>
+    <table>
+        <tr>
+            <td>Account</td>
+            <td>Date</td>
+            <td>Payee</td>
+            <td>Reference</td>
+            <td>Mode</td>
+            <td>Amount</td>
+        </tr>
+        @for(tx <- transfers) {
+            <tr>
+                <td>@tx.account</td>
+                <td>@tx.date</td>
+                <td>@tx.payee</td>
+                <td>@tx.reference</td>
+                <td>@tx.mode</td>
+                <td>@tx.amount</td>
+            </tr>
+        }
+    </table>
+</body>
+</html>
