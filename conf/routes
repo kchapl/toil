@@ -1,3 +1,5 @@
+GET         /assets/*file               controllers.Assets.at(path="/public", file)
+
 GET         /oauth2callback             controllers.AuthController.authCallback(code,state)
 
 GET         /transactions               controllers.TxController.viewTransactions()
@@ -5,3 +7,6 @@ GET         /transactions/upload        controllers.TxController.viewUploadTrans
 POST        /transactions/upload        controllers.TxController.uploadTransactions()
 
 GET         /surplus                    controllers.SurplusController.viewSurplus()
+
+
+GET /test controllers.SurplusController.viewChart()

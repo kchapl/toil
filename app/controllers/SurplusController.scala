@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import models._
 import play.api.libs.ws.WSClient
-import play.api.mvc.Controller
+import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.ExecutionContext
 
@@ -38,5 +38,9 @@ class SurplusController @Inject()(ws: WSClient)(implicit context: ExecutionConte
           )
         )
     }
+  }
+
+  def viewChart() = Action {
+    Ok(views.html.chart())
   }
 }

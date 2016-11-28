@@ -8,5 +8,7 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
   ws,
-  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+  "org.webjars" % "bootstrap" % "3.3.7",
+  "org.webjars.bower" % "chartjs" % "2.4.0",
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
