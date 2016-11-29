@@ -2,19 +2,22 @@ package models
 
 import java.time.Month
 
+import models.Amount.abs
+
 case class Surplus(
   year: Int,
   month: Month,
-  income: Double,
-  spend: Double,
-  transfers: Double
+  income: Amount,
+  spend: Amount,
+  transfers: Amount
 ) {
-  val surplus = income - spend
+  val surplus = income minus spend
 }
 
 object Surplus {
   def fromTransactions(year: Int, month: Month, transactions: Seq[Transaction]) = {
-    def sum(p: Transaction => Boolean) = transactions.filter(p).map(_.amount).sum
+    def sum(p: Transaction => Boolean): Amount =
+      Amount.sum(transactions.filter(p).map(t => abs(t.amount)))
     Surplus(
       year,
       month,

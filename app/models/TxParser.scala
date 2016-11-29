@@ -22,7 +22,7 @@ object TxParser {
       payee = payeeFrom(parsed).trim,
       reference = referenceFrom(parsed).map(_.trim),
       mode = modeFrom(parsed).map(_.trim),
-      amount = parsed.last.replaceFirst(",", "").toDouble
+      amount = Amount(parsed.last.replaceFirst(",", ""))
     )
   }
 

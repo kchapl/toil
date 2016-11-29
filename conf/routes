@@ -9,4 +9,7 @@ POST        /transactions/upload        controllers.TxController.uploadTransacti
 GET         /surplus                    controllers.SurplusController.viewSurplus()
 
 
+
+GET         /surplusFigs                    controllers.SurplusController.viewSurplusFigures()
+
 GET /test controllers.SurplusController.viewChart()

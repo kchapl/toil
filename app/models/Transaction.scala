@@ -14,13 +14,13 @@ case class Transaction(
   payee: String,
   reference: Option[String],
   mode: Option[String],
-  amount: Double
+  amount: Amount
 ) {
   val isTransfer = mode.contains("TFR") || payee.contains("LOAN") || payee.contains("MONEY")
-  val isTransferFrom = isTransfer && amount > 0
-  val isTransferTo = isTransfer && amount < 0
-  val isIncome = amount > 0 && !isTransfer
-  val isSpend = amount < 0 && !isTransfer
+  val isTransferFrom = isTransfer && amount.isPos
+  val isTransferTo = isTransfer && amount.isNeg
+  val isIncome = amount.isPos && !isTransfer
+  val isSpend = amount.isNeg && !isTransfer
 }
 
 object Transaction {
@@ -33,7 +33,7 @@ object Transaction {
       payee = row.values(2),
       reference = opt(row.values(3)),
       mode = opt(row.values(4)),
-      amount = row.values(5).toDouble
+      amount = Amount(row.values(5))
     )
   }
 
