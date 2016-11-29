@@ -11,6 +11,8 @@ case class Amount(pounds: Double) {
 
   def plus(a: Amount): Amount = op(a) { _ + _ }
   def minus(a: Amount): Amount = op(a) { _ - _ }
+
+  override def toString: String = f"$pounds%1.2f"
 }
 
 object Amount {
