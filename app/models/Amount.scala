@@ -13,6 +13,7 @@ case class Amount(pounds: Double) {
   def minus(a: Amount): Amount = op(a) { _ - _ }
 
   def formatted: String = java.text.NumberFormat.getCurrencyInstance.format(pounds)
+  override def toString: String = pounds.toString
 }
 
 object Amount {
