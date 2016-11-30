@@ -16,7 +16,11 @@ case class Transaction(
   mode: Option[String],
   amount: Amount
 ) {
-  val isTransfer = mode.contains("TFR") || payee.contains("LOAN") || payee.contains("MONEY")
+  val isTransfer = {
+    mode.contains("TFR") ||
+      (mode.contains("DD") && Transaction.ddTransferPayees.exists(payee.contains)) ||
+      Transaction.otherTransferPayees.exists(payee.contains)
+  }
   val isTransferFrom = isTransfer && amount.isPos
   val isTransferTo = isTransfer && amount.isNeg
   val isIncome = amount.isPos && !isTransfer
@@ -24,6 +28,9 @@ case class Transaction(
 }
 
 object Transaction {
+
+  val ddTransferPayees = Seq("LOANS", "MONEY", "CREDIT CARD")
+  val otherTransferPayees = Seq("DIRECT DEBIT PAYMENT")
 
   def fromRow(row: Row) = {
     def opt(s: String) = if (s.isEmpty) None else Some(s)
