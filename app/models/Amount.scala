@@ -7,6 +7,8 @@ case class Amount(pounds: Double) {
   val isPos: Boolean = pounds > 0
   val isNeg: Boolean = pounds < 0
 
+  def neg: Amount = Amount(-pounds)
+
   def op(a: Amount)(f: (Int, Int) => Int): Amount = Amount(f(pence, a.pence).toDouble / 100)
 
   def plus(a: Amount): Amount = op(a) { _ + _ }

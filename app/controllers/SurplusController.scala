@@ -39,8 +39,4 @@ class SurplusController @Inject()(ws: WSClient)(implicit context: ExecutionConte
         )
     }
   }
-
-  def viewChart() = Action {
-    Ok(views.html.chart())
-  }
 }

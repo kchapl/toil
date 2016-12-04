@@ -8,8 +8,7 @@ case class Surplus(
   year: Int,
   month: Month,
   income: Amount,
-  spend: Amount,
-  transfers: Amount
+  spend: Amount
 ) {
   val surplus = income minus spend
 }
@@ -22,8 +21,7 @@ object Surplus {
       year,
       month,
       income = sum(_.isIncome),
-      spend = sum(_.isSpend),
-      transfers = sum(_.isTransfer)
+      spend = sum(_.isSpend)
     )
   }
 }

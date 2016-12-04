@@ -11,5 +11,3 @@ GET         /surplus                    controllers.SurplusController.viewSurplu
 
 
 GET         /surplusFigs                    controllers.SurplusController.viewSurplusFigures()
-
-GET /test controllers.SurplusController.viewChart()
