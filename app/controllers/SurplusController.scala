@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import models._
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
 
@@ -20,7 +20,7 @@ class SurplusController @Inject()(ws: WSClient)(implicit context: ExecutionConte
           (t.date.getYear, t.date.getMonth)
         }.map {
           case ((year, month), txs) => Surplus.fromTransactions(year, month, txs)
-        }.toSeq
+        }.toSeq.sortBy(s => (s.year, s.month))
         Ok(views.html.surplus(surplus))
     }
   }

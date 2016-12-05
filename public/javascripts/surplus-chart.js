@@ -2,10 +2,7 @@ var ctx = document.getElementById("chart");
 
 new Chart(ctx, {
     type: 'bar',
-    data: {
-        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-        datasets: [incomeDataset, spendDataset, surplusDataset]
-    },
+    data: chartData,
     options: {
         scales: {
             xAxes: [{
