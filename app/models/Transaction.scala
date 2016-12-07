@@ -57,6 +57,14 @@ object Transaction {
     }
   }
 
+  def fetchForAccount(ws: WSClient, accessToken: String, name: String): Future[Seq[Transaction]] = {
+    fetchAll(ws, accessToken) map {
+      case Left(_) => Nil
+      case Right(txs) =>
+        txs filter (_.account == name) sortBy (_.date.toEpochDay)
+    }
+  }
+
   def append(txToAppend: Set[Transaction], txAlready: Set[Transaction])
     (f: Set[Transaction] => Future[Either[String, Unit]]): Future[Either[String, Unit]] = {
     f(txToAppend -- txAlready)

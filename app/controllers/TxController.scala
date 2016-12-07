@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
 
 class TxController @Inject()(ws: WSClient)(implicit context: ExecutionContext)
-  extends Controller with Security {
+    extends Controller with Security {
 
   def viewTransactions = AuthorizedAction.async { implicit request =>
     GoogleSheet.getValues(

@@ -1,0 +1,23 @@
+@(accounts: Seq[Account])
+
+<html>
+    <head>
+        <title>Accounts</title>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td>Name</td>
+                <td>Date</td>
+                <td>Balance</td>
+            </tr>
+            @for(a <- accounts) {
+                <tr>
+                    <td>@a.name</td>
+                    <td>@a.latestBalance.date</td>
+                    <td>@a.latestBalance.amount</td>
+                </tr>
+            }
+        </table>
+    </body>
+</html>
