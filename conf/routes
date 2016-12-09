@@ -3,10 +3,11 @@ GET         /assets/*file               controllers.Assets.at(path="/public", fi
 GET         /oauth2callback             controllers.AuthController.authCallback(code,state)
 
 GET         /accounts                   controllers.AccountController.viewAccounts()
+GET         /account/:name              controllers.AccountController.viewAccount(name)
 
-GET         /transactions               controllers.TxController.viewTransactions()
-GET         /transactions/upload        controllers.TxController.viewUploadTransactions()
-POST        /transactions/upload        controllers.TxController.uploadTransactions()
+GET         /transactions               controllers.TransactionController.viewTransactions()
+GET         /transactions/upload        controllers.TransactionController.viewUploadTransactions()
+POST        /transactions/upload        controllers.TransactionController.uploadTransactions()
 
 GET         /surplus                    controllers.SurplusController.viewSurplus()
 GET         /surplusFigs                controllers.SurplusController.viewSurplusFigures()

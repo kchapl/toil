@@ -2,7 +2,7 @@ package services
 
 import scala.io.Source
 
-object TxImporter {
+object TransactionImporter {
 
   def importTransactions(path: String): Seq[String] = Source.fromFile(path).getLines().toSeq
 }

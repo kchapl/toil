@@ -1,6 +1,7 @@
 package services
 
-import models.{Row, SheetRange}
+import java.net.URLEncoder
+
 import play.api.http.Status.OK
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest}
@@ -11,20 +12,29 @@ import scala.concurrent.Future
 
 object GoogleSheet {
 
+  case class SheetRange(
+    sheetName: String,
+    fromColumn: String,
+    toColumn: String
+  ) {
+    val selector = s"$sheetName!$fromColumn:$toColumn"
+    val urlEncodedSelector = URLEncoder.encode(selector, utf_8.charset)
+  }
+
+  case class Row(values: Seq[String])
+
   private def mkRequest(
     ws: WSClient,
     accessToken: String,
     sheetFileId: String,
     suffix: String
   ): WSRequest = {
-    val url = "https://sheets.googleapis.com/" +
-      s"v4/spreadsheets/$sheetFileId/values/$suffix"
+    val url = s"https://sheets.googleapis.com/v4/spreadsheets/$sheetFileId/values/$suffix"
     ws.url(url).withHeaders("Authorization" -> s"Bearer $accessToken")
   }
 
   /*
-   * https://developers.google.com/sheets/reference/rest/v4
-   * /spreadsheets.values/get
+   * https://developers.google.com/sheets/reference/rest/v4/spreadsheets.values/get
    */
   def getValues(
     ws: WSClient,
@@ -50,25 +60,21 @@ object GoogleSheet {
     mkRequest(ws, accessToken, sheetFileId, range.urlEncodedSelector).get().map { response =>
 
       // todo: turn into service exception and log in controller
-      println(response.body)
+      //println(response.body)
 
       response.status match {
         case OK =>
           response.json \ "values" match {
-            case JsDefined(JsArray(jsonRows)) =>
-              Right(toRows(jsonRows))
-            case _ =>
-              Right(Nil)
+            case JsDefined(JsArray(jsonRows)) => Right(toRows(jsonRows))
+            case _ => Right(Nil)
           }
-        case _ =>
-          Left(s"${ response.status }: ${ response.statusText }")
+        case _ => Left(s"${ response.status }: ${ response.statusText }")
       }
     }
   }
 
   /*
-   * https://developers.google.com/sheets/reference/rest/v4
-   * /spreadsheets.values/append
+   * https://developers.google.com/sheets/reference/rest/v4/spreadsheets.values/append
    */
   def appendValues(
     ws: WSClient,
@@ -97,7 +103,7 @@ object GoogleSheet {
       .post(valuesToJson).map { response =>
 
       // todo: turn into service exception and log in controller
-      println(response.body)
+      //println(response.body)
 
       response.status match {
         case OK => Right(())

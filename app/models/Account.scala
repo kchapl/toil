@@ -1,49 +1,29 @@
 package models
 
-import java.time.LocalDate
+import scala.annotation.tailrec
 
-import play.api.libs.ws.WSClient
-import services.GoogleSheet
+case class Account(name: String, originalBalance: Amount, transactions: Set[Transaction]) {
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+  val balances: Seq[DateAmount] = {
 
-case class Account(name: String, originalBalance: Balance, latestBalance: Balance)
-
-object Account {
-
-  def fromRow(r: Row) = {
-    val balance = Balance(
-      date = LocalDate.parse(r.values(1)),
-      amount = Amount(r.values(2).toDouble)
-    )
-    Account(
-      name = r.values(0),
-      originalBalance = balance,
-      latestBalance = balance
-    )
-  }
-
-  def fetchAll(ws: WSClient, accessToken: String): Future[Seq[Account]] = {
-    GoogleSheet.getValues(
-      ws, accessToken, Config.sheetFileId.get, SheetRange("Accounts", "A", "F")
-    ) flatMap {
-      case Left(msg) =>
-        Future.successful(Nil)
-      case Right(rows) =>
-        val as = rows map { r =>
-          val init = fromRow(r)
-          Transaction.fetchForAccount(ws, accessToken, init.name) map { txs =>
-            txs.lastOption map { tx =>
-              val latestBalance = Balance(
-                date = tx.date,
-                amount = Amount.sum(init.originalBalance.amount +: txs.map(_.amount))
-              )
-              init.copy(latestBalance = latestBalance)
-            } getOrElse init
-          }
-        }
-        Future.sequence(as)
+    @tailrec
+    def go(
+      left: Seq[DateAmount],
+      soFar: Seq[DateAmount] = Nil,
+      prevBalance: Amount = originalBalance
+    ): Seq[DateAmount] = {
+      left match {
+        case hd :: tl =>
+          val currBalance = Amount.sum(prevBalance, hd.amount)
+          go(tl, soFar :+ hd.copy(amount = currBalance), currBalance)
+        case Nil => soFar
+      }
     }
+
+    val diffs = transactions.groupBy(_.date).map {
+      case (date, txs) => DateAmount(date, Amount.sum(txs.map(_.amount).toSeq: _*))
+    }.toSeq.sortBy(_.date.toEpochDay)
+
+    go(diffs)
   }
 }

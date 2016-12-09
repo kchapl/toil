@@ -1,0 +1,66 @@
+@(a: Account)
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Account: @a.name</title>
+        <link href="@routes.Assets.at("lib/bootstrap/css/bootstrap.css")" rel="stylesheet">
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/Chart.bundle.js")"></script>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td>Name</td>
+                <td>Original</td>
+            </tr>
+            <tr>
+                <td>@a.name</td>
+                <td>@a.originalBalance</td>
+            </tr>
+        </table>
+
+        <div class="row">
+            <div class="col-md-1">a</div>
+            <div class="col-md-5">.col-md-1</div>
+            <div class="col-md-5">
+                <div class="panel panel-default">
+                    <div class="panel-body" style="max-width:800px; max-height:200px">
+                        <canvas id="chart" width="800" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1">z</div>
+        </div>
+
+        <script type="text/javascript">
+            var ctx = document.getElementById("chart");
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3'],
+                    datasets: [
+                        {
+                            label: 'Balance',
+                            // @*data: [@a.balances.map(_.amount).mkString(", ")] *@
+                            data: [
+                                {x: @a.balances.head.date, y: @a.balances.head.amount},
+                                {x: 1, y: 2},
+                                {x: 3, y: 7},
+                                {x: 4, y: 3},
+                                {x: 6, y: 6}
+                            ]
+                        }
+                    ]
+                },
+                options: {
+                    steppedLine: true,
+                    spanGaps: true
+                }
+            });
+        </script>
+
+    </body>
+</html>

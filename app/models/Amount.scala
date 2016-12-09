@@ -22,7 +22,7 @@ object Amount {
 
   def apply(s: String): Amount = Amount(s.toDouble)
 
-  def sum(as: Seq[Amount]): Amount = as.foldLeft(Amount(0)) { case (acc, b) => acc.plus(b) }
+  def sum(as: Amount*): Amount = as.foldLeft(Amount(0)) { case (acc, b) => acc.plus(b) }
 
   def abs(a: Amount) = Amount(a.pounds.abs)
 }

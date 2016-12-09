@@ -3,7 +3,7 @@ package models
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-object TxParser {
+object TransactionParser {
 
   private val dateFormatter = DateTimeFormatter.ofPattern("dd'/'MM'/'yyyy")
 
