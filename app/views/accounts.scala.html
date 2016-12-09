@@ -8,14 +8,12 @@
         <table>
             <tr>
                 <td>Name</td>
-                <td>Date</td>
-                <td>Balance</td>
+                <td>Original balance</td>
             </tr>
             @for(a <- accounts) {
                 <tr>
                     <td>@a.name</td>
-                    <td>@a.latestBalance.date</td>
-                    <td>@a.latestBalance.amount</td>
+                    <td>@a.originalBalance</td>
                 </tr>
             }
         </table>
