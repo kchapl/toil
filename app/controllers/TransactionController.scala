@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
+import model.{GapFiller, Organizer, TransactionHandler}
 import models._
 import play.api.mvc.Controller
 
@@ -13,6 +14,11 @@ class TransactionController @Inject()(txHandler: TransactionHandler)
   extends Controller with Security {
 
   def viewTransactions = AuthorizedAction.async { implicit request =>
+
+
+    GapFiller
+
+
     txHandler.allTransactions(request.accessToken) map { txs =>
       val organized = Organizer.organize(txs.toSeq, request.queryString)
       Ok(views.html.transactions(organized))

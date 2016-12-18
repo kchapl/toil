@@ -2,7 +2,7 @@ package services
 
 import javax.inject.Inject
 
-import models._
+import model.{Account, Config, Transaction}
 import play.api.Logger
 import play.api.libs.ws.WSClient
 import services.GoogleSheet.SheetRange
@@ -27,7 +27,7 @@ class GoogleSheetRepository @Inject()(ws: WSClient) extends Repository {
 
   def insertTransactions(accessToken: String, transactions: Set[Transaction]): Unit = {
 
-    Logger.info(s"Inserting ${transactions.size} transactions ...")
+    Logger.info(s"Inserting ${ transactions.size } transactions ...")
 
     fetchAllTransactions(accessToken) foreach { already =>
       val newTxs = transactions -- already

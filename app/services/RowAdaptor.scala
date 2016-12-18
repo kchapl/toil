@@ -2,21 +2,21 @@ package services
 
 import java.time.LocalDate
 
-import models.{Account, Amount, Transaction}
+import model.{Account, Amount, Transaction}
 import services.GoogleSheet.Row
 
 object RowAdaptor {
 
   def toAccount(r: Row) = Account(
-    name = r.values(0),
+    name = r.values.head,
     originalBalance = Amount(r.values(1).toDouble),
     transactions = Set.empty
   )
 
-  def toTransaction(row: Row) = {
+  def toTransaction(row: Row): Transaction = {
     def opt(s: String) = if (s.isEmpty) None else Some(s)
     Transaction(
-      account = row.values(0),
+      account = row.values.head,
       date = LocalDate.parse(row.values(1)),
       payee = row.values(2),
       reference = opt(row.values(3)),

@@ -3,7 +3,7 @@ package controllers
 import java.net.URLDecoder
 import javax.inject.Inject
 
-import models.Config.{clientId, clientSecret, redirectUri}
+import model.Config.{clientId, clientSecret, redirectUri}
 import play.api.libs.ws.WSClient
 import play.api.mvc.Codec.utf_8
 import play.api.mvc.{Action, Controller}

@@ -1,7 +1,7 @@
 package services
 
 import com.google.inject.ImplementedBy
-import models.{Account, Transaction}
+import model.{Account, Transaction}
 
 import scala.concurrent.Future
 

@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
+import model.{Surplus, TransactionHandler}
 import models._
 import play.api.mvc.Controller
 

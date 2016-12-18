@@ -1,8 +1,6 @@
-package models
+package model
 
 import java.time.Month
-
-import models.Amount.abs
 
 case class Surplus(
   year: Int,
@@ -19,7 +17,7 @@ object Surplus {
 
     def fromTransactions(year: Int, month: Month, transactions: Set[Transaction]): Surplus = {
       def sum(p: Transaction => Boolean): Amount =
-        Amount.sum(transactions.filter(p).map(t => abs(t.amount)).toSeq: _*)
+        Amount.sum(transactions.filter(p).map(t => Amount.abs(t.amount)))
       Surplus(
         year,
         month,

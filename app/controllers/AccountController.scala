@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import models.AccountHandler
+import model.AccountHandler
 import play.api.mvc.Controller
 import services.Repository
 

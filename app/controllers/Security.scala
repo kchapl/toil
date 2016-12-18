@@ -4,7 +4,7 @@ import java.math.BigInteger
 import java.net.URLEncoder
 import java.security.SecureRandom
 
-import models.Config.{clientId, redirectUri}
+import model.Config.{clientId, redirectUri}
 import play.api.mvc.Codec.utf_8
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
