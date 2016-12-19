@@ -4,21 +4,21 @@ import scala.annotation.tailrec
 
 object GapFiller {
 
-  def fillGaps[A](as: Seq[A], isGapBetween: (A, A) => Boolean, next: A => A): Seq[A] = {
+  def fillGaps[A](as: Seq[A], next: A => A): Seq[A] = {
 
     @tailrec
     def go(toGo: Seq[A], soFar: Seq[A] = Nil): Seq[A] = {
       toGo match {
-        case hd :: tl =>
+        case curr :: tl =>
           soFar.lastOption match {
-            case Some(c) =>
-              if (isGapBetween(c, hd)) {
-                go(toGo, soFar :+ next(c))
+            case Some(prev) =>
+              if (next(prev) != curr) {
+                go(toGo, soFar :+ next(prev))
               } else {
-                go(tl, soFar :+ hd)
+                go(tl, soFar :+ curr)
               }
             case None =>
-              go(tl, Seq(hd))
+              go(tl, Seq(curr))
           }
         case Nil => soFar
       }
@@ -26,16 +26,4 @@ object GapFiller {
 
     go(as)
   }
-
-  println(
-    fillGaps[Int](
-      Seq(1, 5), { case (a, b) => a < b + 1 }, { _ + 1 }
-    )
-  )
-
-  println(
-    fillGaps[Char](
-      Seq('a', 'd'), { case (a, b) => a.toInt < (b.toInt + 1) }, { a => (a.toInt + 1).toChar }
-    )
-  )
 }
