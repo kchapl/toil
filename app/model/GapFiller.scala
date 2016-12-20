@@ -2,6 +2,7 @@ package model
 
 import scala.annotation.tailrec
 
+// todo move this out because it's not being used
 object GapFiller {
 
   def fillGaps[A](as: Seq[A], next: A => A): Seq[A] = {
