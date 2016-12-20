@@ -24,11 +24,10 @@
 
         <div class="row">
             <div class="col-md-1">a</div>
-            <div class="col-md-5">.col-md-1</div>
-            <div class="col-md-5">
+            <div class="col-md-10">
                 <div class="panel panel-default">
-                    <div class="panel-body" style="max-width:800px; max-height:200px">
-                        <canvas id="chart" width="800" height="200"></canvas>
+                    <div class="panel-body">
+                        <canvas id="chart"></canvas>
                     </div>
                 </div>
             </div>
@@ -36,30 +35,22 @@
         </div>
 
         <script type="text/javascript">
-            var ctx = document.getElementById("chart");
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['1', '2', '3'],
-                    datasets: [
-                        {
-                            label: 'Balance',
-                            // @*data: [@a.balances.map(_.amount).mkString(", ")] *@
-                            data: [
-                                {x: @a.balances.head.date, y: @a.balances.head.amount},
-                                {x: 1, y: 2},
-                                {x: 3, y: 7},
-                                {x: 4, y: 3},
-                                {x: 6, y: 6}
-                            ]
-                        }
-                    ]
-                },
-                options: {
-                    steppedLine: true,
-                    spanGaps: true
-                }
-            });
+                var ctx = document.getElementById('chart');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [@Html(a.balances.map(_.date).mkString("'","', '","'"))],
+                        datasets: [
+                            {
+                                label: 'Balance',
+                                data: [@a.balances.map(_.amount).mkString(", ")]
+                            }
+                        ]
+                    },
+                    options: {
+                        steppedLine: true
+                    }
+                });
         </script>
 
     </body>
