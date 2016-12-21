@@ -17,7 +17,7 @@ object Surplus {
 
     def fromTransactions(year: Int, month: Month, transactions: Set[Transaction]): Surplus = {
       def sum(p: Transaction => Boolean): Amount =
-        Amount.sum(transactions.filter(p).map(t => Amount.abs(t.amount)))
+        Amount.sum(transactions.filter(p).map(t => Amount.abs(t.amount)).toSeq:_*)
       Surplus(
         year,
         month,
