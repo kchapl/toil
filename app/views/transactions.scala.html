@@ -1,27 +1,24 @@
-@import model.Transaction
-@(transactions: Seq[Transaction])
-<html>
-<head></head>
-<body>
-    <table>
-        <tr>
-            <td>Account</td>
-            <td>Date</td>
-            <td>Payee</td>
-            <td>Reference</td>
-            <td>Mode</td>
-            <td>Amount</td>
-        </tr>
-        @for(tx <- transactions) {
+@(transactions: Seq[model.Transaction])
+
+    @frame(title = "Transactions", highlightedNavItem = "Transactions") {
+        <table>
             <tr>
-                <td>@tx.account</td>
-                <td>@tx.date</td>
-                <td>@tx.payee</td>
-                <td>@tx.reference</td>
-                <td>@tx.mode</td>
-                <td>@tx.amount</td>
+                <td>Account</td>
+                <td>Date</td>
+                <td>Payee</td>
+                <td>Reference</td>
+                <td>Mode</td>
+                <td>Amount</td>
             </tr>
-        }
-    </table>
-</body>
-</html>
+            @for(tx <- transactions) {
+                <tr>
+                    <td>@tx.account</td>
+                    <td>@tx.date</td>
+                    <td>@tx.payee</td>
+                    <td>@tx.reference</td>
+                    <td>@tx.mode</td>
+                    <td>@tx.amount</td>
+                </tr>
+            }
+        </table>
+    }

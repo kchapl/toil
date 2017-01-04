@@ -1,21 +1,16 @@
 @(accounts: Seq[model.Account])
 
-<html>
-    <head>
-        <title>Accounts</title>
-    </head>
-    <body>
-        <table>
+@frame(title = "Accounts", highlightedNavItem = "Accounts") {
+    <table>
+        <tr>
+            <td>Name</td>
+            <td>Original balance</td>
+        </tr>
+        @for(a <- accounts) {
             <tr>
-                <td>Name</td>
-                <td>Original balance</td>
+                <td>@a.name</td>
+                <td>@a.originalBalance</td>
             </tr>
-            @for(a <- accounts) {
-                <tr>
-                    <td>@a.name</td>
-                    <td>@a.originalBalance</td>
-                </tr>
-            }
-        </table>
-    </body>
-</html>
+        }
+    </table>
+}

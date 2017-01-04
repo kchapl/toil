@@ -1,4 +1,12 @@
-@(title: String)(content: Html)
+@(title: String, highlightedNavItem: String)(content: Html)
+
+@navClass(item: String) = {
+    @if(item == highlightedNavItem) { class="active"} else {}
+}
+
+@nav(item: String, call: Call) = {
+    <li@navClass(item)><a href="@call">@item</a></li>
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,19 +40,22 @@
             <div class="row">
                 <div class="col-sm-3 col-md-2 sidebar">
                     <ul class="nav nav-sidebar">
-                        <li class="active"><a href="@controllers.routes.DashboardController.view()">Overview</a></li>
+                        @nav("Overview", controllers.routes.DashboardController.view())
                     </ul>
                     <ul class="nav nav-sidebar">
-                        <li><a href="@controllers.routes.AccountController.viewAccounts()">Accounts</a></li>
+                        @nav("Accounts", controllers.routes.AccountController.viewAccounts())
                     </ul>
                     <ul class="nav nav-sidebar">
-                        <li><a href="@controllers.routes.TransactionController.viewTransactions()">Transactions</a></li>
-                        <li><a href="@controllers.routes.TransactionController.uploadTransactions()">Upload</a></li>
-                        <li><a href="@controllers.routes.SurplusController.viewSurplus()">Surplus</a></li>
+                        @nav("Transactions", controllers.routes.TransactionController.viewTransactions())
+                        @nav("Upload", controllers.routes.TransactionController.uploadTransactions())
+                        @nav("Surplus", controllers.routes.SurplusController.viewSurplus())
                     </ul>
                 </div>
 
-                @content
+                <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                    <h1 class="page-header">@title</h1>
+                    @content
+                </div>
 
             </div>
         </div>
