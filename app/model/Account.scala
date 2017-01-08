@@ -22,15 +22,12 @@ case class Account(name: String, originalBalance: Amount, transactions: Set[Tran
       }
     }
 
-    val diffs = transactions.groupBy(_.date).map {
-      case (date, txs) => DateAmount(date, Amount.sum(txs.map(_.amount).toSeq: _*))
-    }.toSeq.sortBy(_.date.toEpochDay)
-
-    val filledDiffs = diffs.foldLeft(Seq.empty[DateAmount]) { (soFar, curr) =>
-      soFar ++ soFar.lastOption.map(a => filling(a, curr)).getOrElse(Nil) :+ curr
+    val diffs = DateAmount.fromTransactions(transactions).foldLeft(Seq.empty[DateAmount]) {
+      (soFar, curr) =>
+        soFar ++ soFar.lastOption.map(a => filling(a, curr)).getOrElse(Nil) :+ curr
     }
 
-    go(filledDiffs)
+    go(diffs)
   }
 
   private def filling(a: DateAmount, b: DateAmount): Seq[DateAmount] = {
