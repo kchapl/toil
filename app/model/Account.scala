@@ -6,7 +6,7 @@ import scala.annotation.tailrec
 
 case class Account(name: String, originalBalance: Amount, transactions: Set[Transaction]) {
 
-  val balances: Seq[DateAmount] = {
+  val dateBalances: Seq[DateAmount] = {
 
     @tailrec
     def go(

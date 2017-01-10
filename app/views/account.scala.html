@@ -39,11 +39,11 @@
                 new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: [@Html(a.balances.map(_.date).mkString("'","', '","'"))],
+                        labels: [@Html(a.dateBalances.map(_.date).mkString("'","', '","'"))],
                         datasets: [
                             {
                                 label: 'Balance',
-                                data: [@a.balances.map(_.amount.pounds).mkString(", ")]
+                                data: [@a.dateBalances.map(_.amount.pounds).mkString(", ")]
                             }
                         ]
                     },

@@ -18,7 +18,7 @@ case class Amount(pence: Int) {
 
 object Amount {
 
-  def fromString(s: String): Amount = Amount(s.replaceFirst("\\.", "").toInt)
+  def fromString(s: String): Amount = Amount((s.toDouble * 100).toInt)
 
   def sum(as: Amount*): Amount = as.foldLeft(Amount(0)) { case (acc, b) => acc.plus(b) }
 
