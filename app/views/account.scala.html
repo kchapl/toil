@@ -43,7 +43,7 @@
                         datasets: [
                             {
                                 label: 'Balance',
-                                data: [@a.balances.map(_.amount).mkString(", ")]
+                                data: [@a.balances.map(_.amount.pounds).mkString(", ")]
                             }
                         ]
                     },

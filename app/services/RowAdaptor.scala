@@ -9,7 +9,7 @@ object RowAdaptor {
 
   def toAccount(r: Row) = Account(
     name = r.values.head,
-    originalBalance = Amount(r.values(1).toDouble),
+    originalBalance = Amount.fromString(r.values(1)),
     transactions = Set.empty
   )
 
@@ -21,7 +21,7 @@ object RowAdaptor {
       payee = row.values(2),
       reference = opt(row.values(3)),
       mode = opt(row.values(4)),
-      amount = Amount(row.values(5))
+      amount = Amount.fromString(row.values(5))
     )
   }
 
