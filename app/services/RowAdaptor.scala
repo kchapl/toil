@@ -32,7 +32,7 @@ object RowAdaptor {
       tx.payee,
       tx.reference getOrElse "",
       tx.mode getOrElse "",
-      tx.amount.toString
+      tx.amount.pounds.toString
     )
   )
 }
