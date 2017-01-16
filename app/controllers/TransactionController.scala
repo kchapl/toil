@@ -1,34 +1,30 @@
 package controllers
 
-import javax.inject.Inject
-
-import model.{GapFiller, Organizer, TransactionHandler}
-import models._
+import model.TransactionHandler.allTransactions
+import model.{Organizer, TransactionHandler}
 import play.api.mvc.Controller
+import services.GoogleSheet
 
-import scala.concurrent.ExecutionContext
 import scala.io.Source
 
-class TransactionController @Inject()(txHandler: TransactionHandler)
-  (implicit context: ExecutionContext)
-  extends Controller with Security {
+class TransactionController extends Controller with Security {
 
-  def viewTransactions = AuthorizedAction.async { implicit request =>
-
-
-    GapFiller
-
-
-    txHandler.allTransactions(request.accessToken) map { txs =>
-      val organized = Organizer.organize(txs.toSeq, request.queryString)
-      Ok(views.html.transactions(organized))
-    }
+  def viewTransactions = AuthorizedAction { implicit request =>
+    val txs = allTransactions(request.accessToken)(GoogleSheet.fetchAllRows).toSeq
+    val organized = Organizer.organize(txs, request.queryString)
+    Ok(views.html.transactions(organized))
   }
 
+  //noinspection TypeAnnotation
   def uploadTransactions = AuthorizedAction(parse.multipartFormData) { implicit request =>
     request.body.file("transactions").map { filePart =>
       val accountName = request.body.dataParts("account").head
-      txHandler.uploadTransactions(request.accessToken, accountName, Source.fromFile(filePart.ref.file))
+      val source = Source.fromFile(filePart.ref.file)
+      TransactionHandler.uploadTransactions(
+        request.accessToken,
+        accountName,
+        source
+      )(GoogleSheet.fetchAllRows)(GoogleSheet.appendRows)
       Redirect(routes.TransactionController.viewTransactions())
     } getOrElse {
       Ok("File upload failed")

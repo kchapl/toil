@@ -1,19 +1,22 @@
 package model
 
-import javax.inject.Inject
+import model.RowHelper._
 
-import services.Repository
-
-import scala.concurrent.Future
 import scala.io.BufferedSource
 
-class TransactionHandler @Inject()(repo: Repository) {
+object TransactionHandler {
 
-  def allTransactions(accessToken: String): Future[Set[Transaction]] =
-    repo.fetchAllTransactions(accessToken)
+  private val transactionSheet = Sheet("Transactions", numCols = 6)
 
-  def uploadTransactions(accessToken: String, accountName: String, src: BufferedSource): Unit = {
+  def allTransactions(accessToken: String)
+    (fetch: (String, Sheet) => Seq[Seq[String]]): Set[Transaction] = {
+    val rows = fetch(accessToken, transactionSheet)
+    rows.map(toTransaction).toSet
+  }
 
+  def uploadTransactions(accessToken: String, accountName: String, src: BufferedSource)
+    (fetch: (String, Sheet) => Seq[Seq[String]])
+    (append: (String, Sheet, Seq[Seq[String]]) => Int): Int = {
     val txToAppend = {
       def parse(line: String) = accountName match {
         case "HongCurr" => TransactionParser.parseHongCurrLine(accountName)(line)
@@ -21,7 +24,7 @@ class TransactionHandler @Inject()(repo: Repository) {
       }
       src.getLines().toSet map parse
     }
-
-    repo.insertTransactions(accessToken, txToAppend)
+    val newTxs = txToAppend -- allTransactions(accessToken)(fetch)
+    append(accessToken, transactionSheet, newTxs.map(toRow).toSeq)
   }
 }

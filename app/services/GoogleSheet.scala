@@ -1,114 +1,69 @@
 package services
 
-import java.net.URLEncoder
+import java.util.{List => JavaList}
 
-import play.api.http.Status.OK
-import play.api.libs.json._
-import play.api.libs.ws.{WSClient, WSRequest}
-import play.api.mvc.Codec.utf_8
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.services.sheets.v4.Sheets
+import com.google.api.services.sheets.v4.model.ValueRange
+import model.{Config, Sheet}
+import play.api.Logger
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.collection.JavaConverters._
+import scala.util.control.NonFatal
 
 object GoogleSheet {
 
-  case class SheetRange(
-    sheetName: String,
-    fromColumn: String,
-    toColumn: String
-  ) {
-    val selector = s"$sheetName!$fromColumn:$toColumn"
-    val urlEncodedSelector = URLEncoder.encode(selector, utf_8.charset)
+  private val appName = Config.appName
+  private val sheetFileId = Config.sheetFileId
+  private val transport = GoogleNetHttpTransport.newTrustedTransport
+  private val jsonFactory = JacksonFactory.getDefaultInstance
+
+  private def valuesService(accessToken: String) = {
+    def sheetsService(accessToken: String) = {
+      val credential = new GoogleCredential().setAccessToken(accessToken)
+      new Sheets.Builder(transport, jsonFactory, credential)
+        .setApplicationName(appName)
+        .build()
+    }
+    sheetsService(accessToken).spreadsheets().values()
   }
 
-  case class Row(values: Seq[String])
-
-  private def mkRequest(
-    ws: WSClient,
-    accessToken: String,
-    sheetFileId: String,
-    suffix: String
-  ): WSRequest = {
-    val url = s"https://sheets.googleapis.com/v4/spreadsheets/$sheetFileId/values/$suffix"
-    ws.url(url).withHeaders("Authorization" -> s"Bearer $accessToken")
-  }
-
-  /*
-   * https://developers.google.com/sheets/reference/rest/v4/spreadsheets.values/get
-   */
-  def getValues(
-    ws: WSClient,
-    accessToken: String,
-    sheetFileId: String,
-    range: SheetRange
-  ): Future[Either[String, Seq[Row]]] = {
-
-    def toRows(values: Seq[JsValue]): Seq[Row] =
-      values map {
-        case JsArray(v) => toRow(v)
-        case _ => Row(Nil)
-      }
-
-    def toRow(values: Seq[JsValue]): Row =
-      Row(
-        values map {
-          case JsString(u) => u
-          case _ => ""
-        }
-      )
-
-    mkRequest(ws, accessToken, sheetFileId, range.urlEncodedSelector).get().map { response =>
-
-      // todo: turn into service exception and log in controller
-      //println(response.body)
-
-      response.status match {
-        case OK =>
-          response.json \ "values" match {
-            case JsDefined(JsArray(jsonRows)) => Right(toRows(jsonRows))
-            case _ => Right(Nil)
-          }
-        case _ => Left(s"${ response.status }: ${ response.statusText }")
-      }
+  def fetchAllRows(accessToken: String, sheet: Sheet): Seq[Seq[String]] = {
+    try {
+      val response = valuesService(accessToken)
+        .get(sheetFileId, sheet.range)
+        .execute()
+      val rows = response.getValues
+      rows.asScala.map(_.asScala.map(_.toString))
+    } catch {
+      case NonFatal(e) =>
+        Logger.error(s"Failed to fetch from sheet ${ sheet.name }", e)
+        Nil
     }
   }
 
-  /*
-   * https://developers.google.com/sheets/reference/rest/v4/spreadsheets.values/append
-   */
-  def appendValues(
-    ws: WSClient,
-    accessToken: String,
-    sheetFileId: String,
-    range: SheetRange,
-    values: Seq[Row]
-  ): Future[Either[String, Unit]] = {
-
-    def rowToJson(row: Row) = JsArray(
-      Seq(
-        JsString(row.values(0)),
-        JsString(row.values(1)),
-        JsString(row.values(2)),
-        JsString(row.values(3)),
-        JsString(row.values(4)),
-        JsString(row.values(5))
-      )
-    )
-
-    val valuesToJson =
-      JsObject(Seq("values" -> JsArray(values map rowToJson)))
-
-    val suffix = s"${ range.urlEncodedSelector }:append?valueInputOption=raw"
-    mkRequest(ws, accessToken, sheetFileId, suffix)
-      .post(valuesToJson).map { response =>
-
-      // todo: turn into service exception and log in controller
-      //println(response.body)
-
-      response.status match {
-        case OK => Right(())
-        case _ => Left(s"${ response.status }: ${ response.statusText }")
+  def appendRows(accessToken: String, sheet: Sheet, rows: Seq[Seq[String]]): Int = {
+    val values: JavaList[JavaList[AnyRef]] = rows.map(_.map(_.asInstanceOf[AnyRef]).asJava).asJava
+    val content = new ValueRange().setMajorDimension("ROWS").setValues(values)
+    try {
+      val response = valuesService(accessToken)
+        .append(sheetFileId, sheet.range, content)
+        .setValueInputOption("RAW")
+        .execute()
+        .getUpdates
+      val numRowsAppended = for {
+        updates <- Option(response)
+        numUpdates <- Option(updates.getUpdatedRows)
+      } yield {
+        numUpdates.toInt
       }
+      numRowsAppended getOrElse 0
+    } catch {
+      case NonFatal(e) =>
+        Logger.error("Failed to append to transactions sheet", e)
+        0
     }
   }
 }
