@@ -22,7 +22,8 @@ object RowHelper {
       payee = values(2),
       reference = opt(values(3)),
       mode = opt(values(4)),
-      amount = Amount.fromString(values(5))
+      amount = Amount.fromString(values(5)),
+      category = values(6)
     )
   }
 
@@ -34,9 +35,4 @@ object RowHelper {
     tx.mode getOrElse "",
     tx.amount.pounds.toString
   )
-
-  def toRange(sheetName: String, numCols: Int) = {
-    val endColumn = (numCols + 64).toChar.toString
-    s"$sheetName!A:$endColumn"
-  }
 }

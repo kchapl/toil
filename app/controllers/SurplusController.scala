@@ -19,7 +19,9 @@ class SurplusController extends Controller with Security {
       views.html.surplusFigures(
         txs.toSeq.filter(_.isIncome),
         txs.toSeq.filter(_.isSpend),
-        txs.toSeq.filter(_.isTransfer)
+        txs.toSeq.filter(_.isTransfer),
+        txs.toSeq.filter(_.isRepayment),
+        txs.toSeq.filter(_.isRefund)
       )
     )
   }

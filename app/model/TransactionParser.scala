@@ -22,7 +22,8 @@ object TransactionParser {
       payee = payeeFrom(parsed).trim,
       reference = referenceFrom(parsed).map(_.trim),
       mode = modeFrom(parsed).map(_.trim),
-      amount = Amount.fromString(parsed.last.replaceFirst(",", ""))
+      amount = Amount.fromString(parsed.last.replaceFirst(",", "")),
+      category = "I"
     )
   }
 

@@ -6,7 +6,7 @@ import scala.io.BufferedSource
 
 object TransactionHandler {
 
-  private val transactionSheet = Sheet("Transactions", numCols = 6)
+  private val transactionSheet = Sheet("Transactions", numCols = 7)
 
   def allTransactions(accessToken: String)
     (fetch: (String, Sheet) => Seq[Seq[String]]): Set[Transaction] = {

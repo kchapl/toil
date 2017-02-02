@@ -8,20 +8,12 @@ case class Transaction(
   payee: String,
   reference: Option[String],
   mode: Option[String],
-  amount: Amount
+  amount: Amount,
+  category: String
 ) {
-  val isTransfer = {
-    mode.contains("TFR") ||
-      (mode.contains("DD") && Transaction.ddTransferPayees.exists(payee.contains)) ||
-      Transaction.otherTransferPayees.exists(payee.contains)
-  }
-  val isTransferFrom = isTransfer && amount.isPos
-  val isTransferTo = isTransfer && amount.isNeg
-  val isIncome = amount.isPos && !isTransfer
-  val isSpend = amount.isNeg && !isTransfer
-}
-
-object Transaction {
-  val ddTransferPayees = Seq("LOANS", "MONEY", "CREDIT CARD")
-  val otherTransferPayees = Seq("DIRECT DEBIT PAYMENT")
+  val isTransfer: Boolean = category == "T"
+  val isIncome: Boolean = category == "I"
+  val isSpend: Boolean = category == "S"
+  val isRepayment: Boolean = category == "R"
+  val isRefund: Boolean = category == "B"
 }
