@@ -5,6 +5,7 @@ case class Amount(pence: Int) {
   val isPos: Boolean = pence > 0
   val isNeg: Boolean = pence < 0
 
+  def abs: Amount = Amount(pence.abs)
   def neg: Amount = Amount(-pence)
 
   def op(a: Amount)(f: (Int, Int) => Int): Amount = Amount(f(pence, a.pence))
@@ -20,7 +21,5 @@ object Amount {
 
   def fromString(s: String): Amount = Amount((BigDecimal(s) * 100).toInt)
 
-  def sum(as: Amount*): Amount = as.foldLeft(Amount(0)) { case (acc, b) => acc.plus(b) }
-
-  def abs(a: Amount) = Amount(a.pence.abs)
+  def sum(as: Seq[Amount]): Amount = as.foldLeft(Amount(0)) { case (acc, b) => acc.plus(b) }
 }
