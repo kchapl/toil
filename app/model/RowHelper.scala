@@ -33,6 +33,7 @@ object RowHelper {
     tx.payee,
     tx.reference getOrElse "",
     tx.mode getOrElse "",
-    tx.amount.pounds.toString
+    tx.amount.pounds.toString,
+    tx.category
   )
 }

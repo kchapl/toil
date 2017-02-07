@@ -16,4 +16,5 @@ case class Transaction(
   val isSpend: Boolean = category == "S"
   val isRepayment: Boolean = category == "R"
   val isRefund: Boolean = category == "B"
+  val isUncategorised: Boolean = category == "U"
 }

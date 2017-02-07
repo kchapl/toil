@@ -23,7 +23,7 @@ object TransactionParser {
       reference = referenceFrom(parsed).map(_.trim),
       mode = modeFrom(parsed).map(_.trim),
       amount = Amount.fromString(parsed.last.replaceFirst(",", "")),
-      category = "I"
+      category = "U"
     )
   }
 
