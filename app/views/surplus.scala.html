@@ -1,97 +1,88 @@
 @import model.MonthSurplus
 @(surpluses: Seq[MonthSurplus])
 
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Surplus</title>
-        <link href="@routes.Assets.at("lib/bootstrap/css/bootstrap.css")" rel="stylesheet">
-        <script type="text/javascript" src="@routes.Assets.at("javascripts/Chart.bundle.js")"></script>
-        <script type="text/javascript">
-            var chartData = {
-                labels: [@Html(surpluses.map(_.month).mkString("'", "', '", "'"))],
-                datasets: [
-                    {
-                        label: 'Income',
-                        data: [@surpluses.map(_.income.pounds).mkString(", ")],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)',
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(153, 102, 255, 0.2)',
-                            'rgba(255, 159, 64, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(255,99,132,1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)'
-                        ],
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Spend',
-                        data: [@surpluses.map(_.spend.neg.pounds).mkString(", ")],
-                        backgroundColor: [
-                            'rgba(255, 159, 64, 0.2)',
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)',
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(153, 102, 255, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(255,99,132,1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)'
-                        ],
-                        borderWidth: 1
-                    },
-                    {
-                        type: 'line',
-                        label: 'Surplus',
-                        data: [@surpluses.map(_.surplus.pounds).mkString(", ")]
-                    }
-                ]
-            };
-        </script>
-    </head>
-    <body>
-        <table>
+@frame(title = "Surplus", highlightedNavItem = "Surplus") {
+
+    <table>
+        <tr>
+            <td>Y</td>
+            <td>M</td>
+            <td>I</td>
+            <td>S</td>
+            <td>D</td>
+        </tr>
+        @for(s <- surpluses) {
             <tr>
-                <td>Y</td>
-                <td>M</td>
-                <td>I</td>
-                <td>S</td>
-                <td>D</td>
+                <td>@s.year</td>
+                <td>@s.month</td>
+                <td>@s.income.formatted</td>
+                <td>@s.spend.formatted</td>
+                <td>@s.surplus.formatted</td>
             </tr>
-            @for(s <- surpluses) {
-                <tr>
-                    <td>@s.year</td>
-                    <td>@s.month</td>
-                    <td>@s.income.formatted</td>
-                    <td>@s.spend.formatted</td>
-                    <td>@s.surplus.formatted</td>
-                </tr>
-            }
-        </table>
+        }
+    </table>
 
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <canvas id="chart" width="200" height="200"></canvas>
-            </div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <canvas id="chart" width="200" height="200"></canvas>
         </div>
+    </div>
 
-        <script src="@routes.Assets.at("javascripts/surplus-chart.js")"></script>
+    <script type="text/javascript">
+        var chartData = {
+            labels: [@Html(surpluses.map(_.month).mkString("'", "', '", "'"))],
+            datasets: [
+                {
+                    label: 'Income',
+                    data: [@surpluses.map(_.income.pounds).mkString(", ")],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Spend',
+                    data: [@surpluses.map(_.spend.neg.pounds).mkString(", ")],
+                    backgroundColor: [
+                        'rgba(255, 159, 64, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                },
+                {
+                    type: 'line',
+                    label: 'Surplus',
+                    data: [@surpluses.map(_.surplus.pounds).mkString(", ")]
+                }
+            ]
+        };
+    </script>
 
-    </body>
-</html>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/Chart.bundle.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/surplus-chart.js")"></script>
+}
