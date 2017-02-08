@@ -16,7 +16,7 @@ case class Account(name: String, originalBalance: Amount, transactions: Set[Tran
     ): Seq[DateAmount] = {
       left match {
         case hd :: tl =>
-          val currBalance = Amount.sum(prevBalance, hd.amount)
+          val currBalance = Amount.sum(Seq(prevBalance, hd.amount))
           go(tl, soFar :+ hd.copy(amount = currBalance), currBalance)
         case Nil => soFar
       }

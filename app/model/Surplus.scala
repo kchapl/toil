@@ -2,34 +2,49 @@ package model
 
 import java.time.Month
 
-case class Surplus(
+case class MonthSurplus(
   year: Int,
   month: Month,
   income: Amount,
   spend: Amount
 ) {
-  val surplus = income minus spend
+  val surplus: Amount = income minus spend
 }
 
 object Surplus {
 
-  def fromTransactions(transactions: Set[Transaction]): Seq[Surplus] = {
+  def fromTransactions(transactions: Set[Transaction]): Seq[MonthSurplus] =
+    new SurplusCalculator(transactions).months.sortBy(s => (s.year, s.month))
+}
 
-    def fromTransactions(year: Int, month: Month, transactions: Set[Transaction]): Surplus = {
-      def sum(p: Transaction => Boolean): Amount =
-        Amount.sum(transactions.filter(p).map(t => Amount.abs(t.amount)).toSeq: _*)
-      Surplus(
-        year,
-        month,
-        income = sum(_.isIncome),
-        spend = sum(t => t.isSpend || t.isRefund || t.isRepayment)
-      )
+case class Surplus(income: Amount, spend: Amount) {
+  val surplus: Amount = income minus spend
+}
+
+class SurplusCalculator(transactions: Set[Transaction]) {
+
+  lazy val months: Seq[MonthSurplus] = {
+    val txDates = transactions.view.map(_.date)
+    DateRange(txDates.minBy(_.toEpochDay), txDates.maxBy(_.toEpochDay)).months map { m =>
+      val s = surplus(m)
+      val d = m.from
+      MonthSurplus(d.getYear, d.getMonth, s.income, s.spend)
     }
+  }
 
-    transactions.groupBy { t =>
-      (t.date.getYear, t.date.getMonth)
-    }.map {
-      case ((year, month), ts) => fromTransactions(year, month, ts)
-    }.toSeq.sortBy(s => (s.year, s.month))
+  def inDateRange(r: DateRange): Set[Transaction] =
+    for (t <- transactions if r.contains(t.date)) yield t
+
+  def surplus(r: DateRange): Surplus = {
+
+    def sum(p: Transaction => Boolean): Amount =
+      inDateRange(r).foldLeft(Amount(0)) { case (soFar, t) =>
+        if (p(t)) soFar plus t.amount else soFar
+      }
+
+    Surplus(
+      income = sum(_.isIncome),
+      spend = sum(t => t.isSpend || t.isRepayment || t.isRefund).neg
+    )
   }
 }
