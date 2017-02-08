@@ -16,7 +16,7 @@
                 datasets: [
                     {
                         label: 'Income',
-                        data: [@surpluses.map(_.income).mkString(", ")],
+                        data: [@surpluses.map(_.income.pounds).mkString(", ")],
                         backgroundColor: [
                             'rgba(255, 99, 132, 0.2)',
                             'rgba(54, 162, 235, 0.2)',
@@ -37,7 +37,7 @@
                     },
                     {
                         label: 'Spend',
-                        data: [@surpluses.map(_.spend.neg).mkString(", ")],
+                        data: [@surpluses.map(_.spend.neg.pounds).mkString(", ")],
                         backgroundColor: [
                             'rgba(255, 159, 64, 0.2)',
                             'rgba(255, 99, 132, 0.2)',
@@ -59,7 +59,7 @@
                     {
                         type: 'line',
                         label: 'Surplus',
-                        data: [@surpluses.map(_.surplus).mkString(", ")]
+                        data: [@surpluses.map(_.surplus.pounds).mkString(", ")]
                     }
                 ]
             };
