@@ -5,16 +5,19 @@ import model.TransactionHandler.allTransactions
 import play.api.mvc.Controller
 import services.GoogleSheet
 
-class SurplusController extends Controller with Security {
+class SurplusController extends Controller {
 
-  def viewSurplus = AuthorizedAction { implicit request =>
+  def viewSurplus = AuthorisedAction { implicit request =>
     val surpluses =
-      Surplus.fromTransactions(allTransactions(request.accessToken)(GoogleSheet.fetchAllRows))
+      Surplus.fromTransactions(
+        allTransactions(request.session(UserId.key))
+        (GoogleSheet.fetchAllRows)
+      )
     Ok(views.html.surplus(surpluses))
   }
 
-  def viewSurplusFigures = AuthorizedAction { implicit request =>
-    val txs = allTransactions(request.accessToken)(GoogleSheet.fetchAllRows)
+  def viewSurplusFigures = AuthorisedAction { implicit request =>
+    val txs = allTransactions(request.session(UserId.key))(GoogleSheet.fetchAllRows)
     Ok(
       views.html.surplusFigures(
         txs.toSeq.filter(_.isIncome),

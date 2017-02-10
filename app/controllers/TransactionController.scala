@@ -7,21 +7,21 @@ import services.GoogleSheet
 
 import scala.io.Source
 
-class TransactionController extends Controller with Security {
+class TransactionController extends Controller {
 
-  def viewTransactions = AuthorizedAction { implicit request =>
-    val txs = allTransactions(request.accessToken)(GoogleSheet.fetchAllRows).toSeq
+  def viewTransactions = AuthorisedAction { implicit request =>
+    val txs = allTransactions(request.session(UserId.key))(GoogleSheet.fetchAllRows).toSeq
     val organized = Organizer.organize(txs, request.queryString)
     Ok(views.html.transactions(organized))
   }
 
   //noinspection TypeAnnotation
-  def uploadTransactions = AuthorizedAction(parse.multipartFormData) { implicit request =>
+  def uploadTransactions = AuthorisedAction(parse.multipartFormData) { implicit request =>
     request.body.file("transactions").map { filePart =>
       val accountName = request.body.dataParts("account").head
       val source = Source.fromFile(filePart.ref.file)
       TransactionHandler.uploadTransactions(
-        request.accessToken,
+        request.session(UserId.key),
         accountName,
         source
       )(GoogleSheet.fetchAllRows)(GoogleSheet.appendRows)
@@ -31,7 +31,7 @@ class TransactionController extends Controller with Security {
     }
   }
 
-  def viewUploadTransactions() = AuthorizedAction {
+  def viewUploadTransactions() = AuthorisedAction {
     Ok(views.html.transactionsUpload())
   }
 }

@@ -1,5 +1,6 @@
 package model
 
+import java.io.File
 import java.net.URLEncoder
 
 import scala.util.Properties
@@ -18,4 +19,6 @@ object Config {
   val clientSecret: String = URLEncoder.encode(plainClientSecret, "UTF-8")
 
   val appName: String = "Toil"
+
+  val fileStore = new File(Properties.tmpDir)
 }

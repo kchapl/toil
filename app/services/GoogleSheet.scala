@@ -2,12 +2,12 @@ package services
 
 import java.util.{List => JavaList}
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.model.ValueRange
-import model.{Config, Sheet}
+import model.{Config, Flow, Sheet}
 import play.api.Logger
 
 import scala.collection.JavaConverters._
@@ -20,19 +20,16 @@ object GoogleSheet {
   private val transport = GoogleNetHttpTransport.newTrustedTransport
   private val jsonFactory = JacksonFactory.getDefaultInstance
 
-  private def valuesService(accessToken: String) = {
-    def sheetsService(accessToken: String) = {
-      val credential = new GoogleCredential().setAccessToken(accessToken)
-      new Sheets.Builder(transport, jsonFactory, credential)
-        .setApplicationName(appName)
-        .build()
-    }
-    sheetsService(accessToken).spreadsheets().values()
+  private def valuesService(authFlow: HttpRequestInitializer) = {
+    new Sheets.Builder(transport, jsonFactory, authFlow)
+      .setApplicationName(appName)
+      .build()
+      .spreadsheets().values()
   }
 
-  def fetchAllRows(accessToken: String, sheet: Sheet): Seq[Seq[String]] = {
+  def fetchAllRows(userId: String, sheet: Sheet): Seq[Seq[String]] = {
     try {
-      val response = valuesService(accessToken)
+      val response = valuesService(Flow.readWrite.loadCredential(userId))
         .get(sheetFileId, sheet.range)
         .execute()
       val rows = response.getValues
@@ -44,11 +41,11 @@ object GoogleSheet {
     }
   }
 
-  def appendRows(accessToken: String, sheet: Sheet, rows: Seq[Seq[String]]): Int = {
+  def appendRows(userId: String, sheet: Sheet, rows: Seq[Seq[String]]): Int = {
     val values: JavaList[JavaList[AnyRef]] = rows.map(_.map(_.asInstanceOf[AnyRef]).asJava).asJava
     val content = new ValueRange().setMajorDimension("ROWS").setValues(values)
     try {
-      val response = valuesService(accessToken)
+      val response = valuesService(Flow.readWrite.loadCredential(userId))
         .append(sheetFileId, sheet.range, content)
         .setValueInputOption("RAW")
         .execute()

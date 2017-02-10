@@ -8,13 +8,13 @@ object TransactionHandler {
 
   private val transactionSheet = Sheet("Transactions", numCols = 7)
 
-  def allTransactions(accessToken: String)
+  def allTransactions(userId: String)
     (fetch: (String, Sheet) => Seq[Seq[String]]): Set[Transaction] = {
-    val rows = fetch(accessToken, transactionSheet)
+    val rows = fetch(userId, transactionSheet)
     rows.map(toTransaction).toSet
   }
 
-  def uploadTransactions(accessToken: String, accountName: String, src: BufferedSource)
+  def uploadTransactions(userId: String, accountName: String, src: BufferedSource)
     (fetch: (String, Sheet) => Seq[Seq[String]])
     (append: (String, Sheet, Seq[Seq[String]]) => Int): Int = {
     val txToAppend = {
@@ -24,7 +24,7 @@ object TransactionHandler {
       }
       src.getLines().toSet map parse
     }
-    val newTxs = txToAppend -- allTransactions(accessToken)(fetch)
-    append(accessToken, transactionSheet, newTxs.map(toRow).toSeq)
+    val newTxs = txToAppend -- allTransactions(userId)(fetch)
+    append(userId, transactionSheet, newTxs.map(toRow).toSeq)
   }
 }
