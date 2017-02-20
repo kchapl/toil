@@ -13,3 +13,5 @@ POST        /transactions/upload        controllers.TransactionController.upload
 
 GET         /surplus                    controllers.SurplusController.viewSurplus()
 GET         /surplusFigs                controllers.SurplusController.viewSurplusFigures()
+
+GET         /fix/dedup                  controllers.TransactionController.dedup()

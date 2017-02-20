@@ -8,16 +8,14 @@ import services.GoogleSheet
 class SurplusController extends Controller {
 
   def viewSurplus = AuthorisedAction { implicit request =>
-    val surpluses =
-      Surplus.fromTransactions(
-        allTransactions(request.session(UserId.key))
-        (GoogleSheet.fetchAllRows)
-      )
+    val userId = request.session(UserId.key)
+    val surpluses = Surplus.fromTransactions(allTransactions(GoogleSheet(userId).fetchAllRows))
     Ok(views.html.surplus(surpluses))
   }
 
   def viewSurplusFigures = AuthorisedAction { implicit request =>
-    val txs = allTransactions(request.session(UserId.key))(GoogleSheet.fetchAllRows)
+    val userId = request.session(UserId.key)
+    val txs = allTransactions(GoogleSheet(userId).fetchAllRows)
     Ok(
       views.html.surplusFigures(
         txs.toSeq.filter(_.isIncome),

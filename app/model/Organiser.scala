@@ -2,7 +2,7 @@ package model
 
 import java.time.LocalDate
 
-object Organizer {
+object Organiser {
 
   implicit val dateOrdering = new Ordering[LocalDate] {
     override def compare(x: LocalDate, y: LocalDate): Int = x.compareTo(y)
@@ -16,7 +16,10 @@ object Organizer {
   private val accountField = "ac"
   private val dateField = "da"
 
-  def organize(txs: Seq[Transaction], params: Map[String, Seq[String]]): Seq[Transaction] = {
+  def organise(
+    txs: Seq[Transaction],
+    params: Map[String, Seq[String]]
+  ): Seq[Transaction] = {
     def param(paramName: String) = params.getOrElse(paramName, Nil)
     applySorts(
       applyFilters(txs, param(filterKey), param(filterValue), param(filterOp)),
@@ -34,7 +37,12 @@ object Organizer {
     filters.foldLeft(txs) { case (acc, ((k, v), o)) => filter(acc, k, v, o) }
   }
 
-  def filter(txs: Seq[Transaction], key: String, value: String, op: String): Seq[Transaction] = {
+  def filter(
+    txs: Seq[Transaction],
+    key: String,
+    value: String,
+    op: String
+  ): Seq[Transaction] = {
     (key, value, op) match {
       case (`accountField`, accName, "=") =>
         txs.filter(_.account == accName)
@@ -47,7 +55,10 @@ object Organizer {
     }
   }
 
-  def applySorts(txs: Seq[Transaction], keys: Seq[String]): Seq[Transaction] = {
+  def applySorts(
+    txs: Seq[Transaction],
+    keys: Seq[String]
+  ): Seq[Transaction] = {
     keys.foldLeft(txs) { case (acc, k) => sort(acc, k) }
   }
 

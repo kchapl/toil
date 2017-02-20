@@ -1,22 +1,20 @@
 package model
 
 import model.RowHelper._
+import model.Transaction.transactionSheet
 
 import scala.io.BufferedSource
 
 object TransactionHandler {
 
-  private val transactionSheet = Sheet("Transactions", numCols = 7)
-
-  def allTransactions(userId: String)
-    (fetch: (String, Sheet) => Seq[Seq[String]]): Set[Transaction] = {
-    val rows = fetch(userId, transactionSheet)
-    rows.map(toTransaction).toSet
+  def allTransactions(fetch: Sheet => Seq[Seq[String]]): Set[Transaction] = {
+    val rows = fetch(transactionSheet)
+    rows.map(Transaction.fromRow).toSet
   }
 
-  def uploadTransactions(userId: String, accountName: String, src: BufferedSource)
-    (fetch: (String, Sheet) => Seq[Seq[String]])
-    (append: (String, Sheet, Seq[Seq[String]]) => Int): Int = {
+  def uploadTransactions(accountName: String, src: BufferedSource)
+    (fetch: Sheet => Seq[Seq[String]])
+    (append: (Sheet, Seq[Seq[String]]) => Int): Int = {
     val txToAppend = {
       def parse(line: String) = accountName match {
         case "HongCurr" => TransactionParser.parseHongCurrLine(accountName)(line)
@@ -24,7 +22,11 @@ object TransactionHandler {
       }
       src.getLines().toSet map parse
     }
-    val newTxs = txToAppend -- allTransactions(userId)(fetch)
-    append(userId, transactionSheet, newTxs.map(toRow).toSeq)
+    val transactions = allTransactions(fetch)
+    val newTxs = txToAppend -- transactions
+    append(
+      transactionSheet,
+      for (t <- newTxs.toSeq) yield toRow(t)
+    )
   }
 }

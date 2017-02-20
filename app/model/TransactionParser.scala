@@ -3,6 +3,8 @@ package model
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import model.Transaction.Category.uncategorised
+
 object TransactionParser {
 
   private val dateFormatter = DateTimeFormatter.ofPattern("dd'/'MM'/'yyyy")
@@ -23,7 +25,7 @@ object TransactionParser {
       reference = referenceFrom(parsed).map(_.trim),
       mode = modeFrom(parsed).map(_.trim),
       amount = Amount.fromString(parsed.last.replaceFirst(",", "")),
-      category = "U"
+      category = uncategorised
     )
   }
 

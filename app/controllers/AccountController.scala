@@ -7,12 +7,14 @@ import services.GoogleSheet
 class AccountController extends Controller {
 
   def viewAccounts = AuthorisedAction { implicit request =>
-    val accounts = allAccounts(request.session(UserId.key))(GoogleSheet.fetchAllRows).toSeq
+    val userId = request.session(UserId.key)
+    val accounts = allAccounts(GoogleSheet(userId).fetchAllRows).toSeq
     Ok(views.html.accounts(accounts))
   }
 
   def viewAccount(name: String) = AuthorisedAction { implicit request =>
-    account(name, request.session(UserId.key))(GoogleSheet.fetchAllRows) map { a =>
+    val userId = request.session(UserId.key)
+    account(name)(GoogleSheet(userId).fetchAllRows) map { a =>
       Ok(views.html.account(a))
     } getOrElse {
       BadRequest(s"No account $name")

@@ -1,29 +1,12 @@
 package model
 
-import java.time.LocalDate
-
 object RowHelper {
 
   def toAccount(values: Seq[String]): Account = {
-    //noinspection ZeroIndexToHead
     Account(
-      name = values(0),
+      name = values.head,
       originalBalance = Amount.fromString(values(1)),
       transactions = Set.empty
-    )
-  }
-
-  def toTransaction(values: Seq[String]): Transaction = {
-    def opt(s: String) = if (s.isEmpty) None else Some(s)
-    //noinspection ZeroIndexToHead
-    Transaction(
-      account = values(0),
-      date = LocalDate.parse(values(1)),
-      payee = values(2),
-      reference = opt(values(3)),
-      mode = opt(values(4)),
-      amount = Amount.fromString(values(5)),
-      category = values(6)
     )
   }
 
