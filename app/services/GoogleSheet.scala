@@ -56,11 +56,7 @@ case class GoogleSheet(userId: String) {
     }
   }
 
-  def replaceAllWith(
-    sheet: Sheet,
-    numRowsToReplace: Int,
-    rows: Seq[Seq[String]]
-  ): Either[String, Unit] = {
+  def replaceAllWith(sheet: Sheet, rows: Seq[Seq[String]]): Either[String, Unit] = {
     try {
       Right(
         {

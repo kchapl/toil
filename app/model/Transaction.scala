@@ -63,11 +63,9 @@ object Transaction {
 
   def dedup(userId: String): Either[String, Unit] = {
     val sheet = GoogleSheet(userId)
-    val ts = sheet.fetchAllRows(transactionSheet).map(fromRow)
     sheet.replaceAllWith(
       transactionSheet,
-      ts.size,
-      ts.distinct.map(RowHelper.toRow)
+      sheet.fetchAllRows(transactionSheet).map(fromRow).distinct.map(RowHelper.toRow)
     )
   }
 }

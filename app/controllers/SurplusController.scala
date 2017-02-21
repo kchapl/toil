@@ -9,8 +9,10 @@ class SurplusController extends Controller {
 
   def viewSurplus = AuthorisedAction { implicit request =>
     val userId = request.session(UserId.key)
-    val surpluses = Surplus.fromTransactions(allTransactions(GoogleSheet(userId).fetchAllRows))
-    Ok(views.html.surplus(surpluses))
+    Surplus.fromTransactions(allTransactions(GoogleSheet(userId).fetchAllRows)) match {
+      case Left(msg) => InternalServerError(msg)
+      case Right(s) => Ok(views.html.surplus(s))
+    }
   }
 
   def viewSurplusFigures = AuthorisedAction { implicit request =>
