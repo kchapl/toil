@@ -3,14 +3,14 @@
 
 @colour(posColour: String, negColour: String) = {[
   @Html(surpluses.map(s => {
-    if (s.surplus.isPos) posColour
-    else negColour
+    if (s.surplus.isPos) s"'$posColour'"
+    else s"'$negColour'"
   }).mkString(", "))
 ]}
 
-@backgroundColour = {@colour("'#32cd32'", "'#ff4500'")}
+@backgroundColour = {@colour("#32cd32", "#ff4500")}
 
-@borderColour = {@colour("'#006400'", "'#8b0000'")}
+@borderColour = {@colour("#006400", "#8b0000")}
 
 @frame(title = "Surplus", highlightedNavItem = "Surplus") {
 
