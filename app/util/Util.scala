@@ -1,4 +1,4 @@
-package model
+package util
 
 object Util {
 
@@ -6,4 +6,6 @@ object Util {
     s.foldRight(Right(Nil): Either[A, List[B]]) {
       (e, acc) => for (xs <- acc.right; x <- e.right) yield x :: xs
     }
+
+  def opt(s: String) = if (s.isEmpty) None else Some(s)
 }

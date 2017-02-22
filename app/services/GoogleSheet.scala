@@ -7,24 +7,39 @@ import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.model.ValueRange
-import model.{Config, Flow, Sheet}
 import play.api.Logger
+import util.{Config, Flow}
 
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
-case class GoogleSheet(userId: String) {
+object GoogleSheet {
+
+  private val appName = Config.appName
+  private val transport = GoogleNetHttpTransport.newTrustedTransport
+  private val jsonFactory = JacksonFactory.getDefaultInstance
 
   private val sheetFileId = Config.sheetFileId
 
-  private def content(rows: Seq[Seq[String]]) = {
+  private def content(rows: Seq[Row]) = {
     val values: JavaList[JavaList[AnyRef]] = rows.map(_.map(_.asInstanceOf[AnyRef]).asJava).asJava
     new ValueRange().setMajorDimension("ROWS").setValues(values)
   }
 
-  private val values = GoogleSheet.valuesService(Flow.readWrite.loadCredential(userId))
+  private def valuesService(authFlow: HttpRequestInitializer) = {
+    new Sheets.Builder(transport, jsonFactory, authFlow)
+      .setApplicationName(appName)
+      .build()
+      .spreadsheets().values()
+  }
 
-  def fetchAllRows(sheet: Sheet): Seq[Seq[String]] = {
+  private def values(implicit userId: String) = GoogleSheet.valuesService(
+    Flow.readWrite.loadCredential(
+      userId
+    )
+  )
+
+  def allRows(sheet: Sheet)(implicit userId: String): Seq[Row] = {
     try {
       val response = values.get(sheetFileId, sheet.range).execute()
       val rows = response.getValues
@@ -36,7 +51,7 @@ case class GoogleSheet(userId: String) {
     }
   }
 
-  def appendRows(sheet: Sheet, rows: Seq[Seq[String]]): Int = {
+  def appendRows(sheet: Sheet, rows: Seq[Row])(implicit userId: String): Int = {
     try {
       val response = values.append(sheetFileId, sheet.range, content(rows))
         .setValueInputOption("RAW")
@@ -56,12 +71,13 @@ case class GoogleSheet(userId: String) {
     }
   }
 
-  def replaceAllWith(sheet: Sheet, rows: Seq[Seq[String]]): Either[String, Unit] = {
+  def replaceAllRows(sheet: Sheet, replacements: Seq[Row])
+    (implicit userId: String): Either[String, Unit] = {
     try {
       Right(
         {
           values.clear(sheetFileId, sheet.range, null).execute()
-          values.update(sheetFileId, sheet.range, content(rows))
+          values.update(sheetFileId, sheet.range, content(replacements))
             .setValueInputOption("RAW")
             .execute()
         }
@@ -70,19 +86,5 @@ case class GoogleSheet(userId: String) {
       case NonFatal(e) =>
         Left(s"Failed to update transactions sheet: ${ e.getMessage }")
     }
-  }
-}
-
-object GoogleSheet {
-
-  private val appName = Config.appName
-  private val transport = GoogleNetHttpTransport.newTrustedTransport
-  private val jsonFactory = JacksonFactory.getDefaultInstance
-
-  def valuesService(authFlow: HttpRequestInitializer): Sheets#Spreadsheets#Values = {
-    new Sheets.Builder(transport, jsonFactory, authFlow)
-      .setApplicationName(appName)
-      .build()
-      .spreadsheets().values()
   }
 }

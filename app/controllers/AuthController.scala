@@ -3,11 +3,11 @@ package controllers
 import java.net.URLDecoder
 import javax.inject.Inject
 
-import model.Config.redirectUri
-import model.Flow
+import util.Config.redirectUri
 import play.api.libs.ws.WSClient
 import play.api.mvc.Codec.utf_8
 import play.api.mvc.{Action, Controller}
+import util.Flow
 
 class AuthController @Inject()(ws: WSClient) extends Controller {
 

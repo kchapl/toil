@@ -1,4 +1,4 @@
-@(a: model.Account)
+@(a: model.AccountAndTransactions)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -6,7 +6,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Account: @a.name</title>
+        <title>Account: @a.account.name</title>
         <link href="@routes.Assets.at("lib/bootstrap/css/bootstrap.css")" rel="stylesheet">
         <script type="text/javascript" src="@routes.Assets.at("javascripts/Chart.bundle.js")"></script>
     </head>
@@ -17,8 +17,8 @@
                 <td>Original</td>
             </tr>
             <tr>
-                <td>@a.name</td>
-                <td>@a.originalBalance</td>
+                <td>@a.account.name</td>
+                <td>@a.account.originalBalance</td>
             </tr>
         </table>
 

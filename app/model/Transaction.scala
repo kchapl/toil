@@ -2,8 +2,6 @@ package model
 
 import java.time.LocalDate
 
-import services.GoogleSheet
-
 case class Transaction(
   account: String,
   date: LocalDate,
@@ -45,27 +43,5 @@ object Transaction {
 
   object Category {
     val uncategorised = "U"
-  }
-
-  val transactionSheet = Sheet("Transactions", numCols = 7)
-
-  private def opt(s: String) = if (s.isEmpty) None else Some(s)
-
-  def fromRow(values: Seq[String]): Transaction = Transaction(
-    account = values.head,
-    date = LocalDate.parse(values(1)),
-    payee = values(2),
-    reference = opt(values(3)),
-    mode = opt(values(4)),
-    amount = Amount.fromString(values(5)),
-    category = values(6)
-  )
-
-  def dedup(userId: String): Either[String, Unit] = {
-    val sheet = GoogleSheet(userId)
-    sheet.replaceAllWith(
-      transactionSheet,
-      sheet.fetchAllRows(transactionSheet).map(fromRow).distinct.map(RowHelper.toRow)
-    )
   }
 }
