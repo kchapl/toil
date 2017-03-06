@@ -27,7 +27,7 @@ class TransactionController extends Controller {
     Ok(views.html.transactions(organised))
   }
 
-  def uploadTransactions = AuthorisedAction(parse.multipartFormData) { implicit request =>
+  def importTransactions = AuthorisedAction(parse.multipartFormData) { implicit request =>
     request.body.file("transactions").map { filePart =>
       val accountName = request.body.dataParts("account").head
       implicit val userId = request.session(UserId.key)
@@ -42,13 +42,13 @@ class TransactionController extends Controller {
         InternalServerError(s"No such account: $accountName")
       }
     } getOrElse {
-      Ok("File upload failed")
+      Ok("Transaction import failed")
     }
   }
 
-  def viewUploadTransactions() = AuthorisedAction { request =>
+  def viewImportTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
-    Ok(views.html.transactionsUpload(allAccounts))
+    Ok(views.html.transactionsImport(allAccounts))
   }
 
   def dedup = AuthorisedAction { implicit request =>

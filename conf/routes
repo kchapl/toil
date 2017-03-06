@@ -8,8 +8,8 @@ GET         /accounts                   controllers.AccountController.viewAccoun
 GET         /account/:name              controllers.AccountController.viewAccount(name)
 
 GET         /transactions               controllers.TransactionController.viewTransactions()
-GET         /transactions/upload        controllers.TransactionController.viewUploadTransactions()
-POST        /transactions/upload        controllers.TransactionController.uploadTransactions()
+GET         /transactions/import        controllers.TransactionController.viewImportTransactions()
+POST        /transactions/import        controllers.TransactionController.importTransactions()
 
 GET         /surplus                    controllers.SurplusController.viewSurplus()
 GET         /surplusFigs                controllers.SurplusController.viewSurplusFigures()
