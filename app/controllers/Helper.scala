@@ -8,14 +8,14 @@ import util.Util.opt
 
 object Helper {
 
-  private val accountSheet = Sheet("Accounts", numCols = 2)
+  private val accountSheet = Sheet("Accounts", numCols = 3)
 
   val transactionSheet = Sheet("Transactions", numCols = 7)
 
   private def toAccount(r: Row): Account = Account(
     name = r.head,
-    originalBalance = Amount.fromString(r(1)),
-    accType = AccountType.fromName(r(2))
+    accType = AccountType.fromName(r(1)),
+    originalBalance = Amount.fromString(r(2))
   )
 
   private def toTransaction(r: Row) = Transaction(

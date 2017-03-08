@@ -1,8 +1,7 @@
 package controllers
 
 import controllers.Helper.{allAccounts, allTransactions, transactionSheet}
-import model.Account.byName
-import model.{Transaction, TransactionHandler}
+import model.Transaction
 import play.api.mvc.Controller
 import services.GoogleSheet
 import util.Organiser
@@ -27,28 +26,31 @@ class TransactionController extends Controller {
     Ok(views.html.transactions(organised))
   }
 
-  def importTransactions = AuthorisedAction(parse.multipartFormData) { implicit request =>
-    request.body.file("transactions").map { filePart =>
-      val accountName = request.body.dataParts("account").head
-      implicit val userId = request.session(UserId.key)
-      allAccounts find byName(accountName) map { account =>
-        val parsed = TransactionHandler.parsed(account, Source.fromFile(filePart.ref.file))
-        GoogleSheet.appendRows(
-          transactionSheet,
-          rows = (parsed -- allTransactions).map(toRow).toSeq
-        )
-        Redirect(routes.TransactionController.viewTransactions())
-      } getOrElse {
-        InternalServerError(s"No such account: $accountName")
-      }
-    } getOrElse {
-      Ok("Transaction import failed")
-    }
-  }
-
   def viewImportTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
     Ok(views.html.transactionsImport(allAccounts))
+  }
+
+  def importTransactions = AuthorisedAction(parse.multipartFormData) { implicit request =>
+    request.body.file("transactions") map { filePart =>
+      implicit val userId = request.session(UserId.key)
+      Transaction.toImport(
+        before = allTransactions.toSet,
+        accounts = allAccounts.toSet,
+        accountName = request.body.dataParts("account").head,
+        source = Source.fromFile(filePart.ref.file)
+      ) match {
+        case Left(f) => InternalServerError(f.description)
+        case Right(ts) =>
+          GoogleSheet.appendRows(
+            transactionSheet,
+            rows = ts.map(toRow).toSeq
+          )
+          Redirect(routes.TransactionController.viewTransactions())
+      }
+    } getOrElse {
+      InternalServerError("Transaction import failed")
+    }
   }
 
   def dedup = AuthorisedAction { implicit request =>
