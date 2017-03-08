@@ -1,4 +1,4 @@
-package model
+package util
 
 import java.io.File
 import java.net.URLEncoder

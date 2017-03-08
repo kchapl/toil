@@ -2,25 +2,35 @@ package model
 
 import java.time.Month
 
-import model.Util.sequence
+import util.Util.sequence
 
 case class MonthSurplus(
-  year: Int,
-  month: Month,
-  income: Amount,
-  spend: Amount
+    year: Int,
+    month: Month,
+    income: Amount,
+    spend: Amount,
+    repayments: Amount,
+    refunds: Amount
 ) {
-  val surplus: Amount = income minus spend
+  val totalSpend: Amount = spend plus repayments minus refunds
+  val surplus: Amount    = income minus totalSpend
 }
 
 object Surplus {
 
-  def fromTransactions(transactions: Set[Transaction]): Either[String, Seq[MonthSurplus]] =
+  def fromTransactions(
+      transactions: Set[Transaction]
+  ): Either[String, Seq[MonthSurplus]] =
     for (months <- new SurplusCalculator(transactions).months.right)
       yield months.sortBy(s => (s.year, s.month))
 }
 
-case class Surplus(income: Amount, spend: Amount) {
+case class Surplus(
+    income: Amount,
+    spend: Amount,
+    repayments: Amount,
+    refunds: Amount
+) {
   val surplus: Amount = income minus spend
 }
 
@@ -34,7 +44,16 @@ class SurplusCalculator(transactions: Set[Transaction]) {
           case Left(msg) => Left(msg)
           case Right(s) =>
             val d = m.from
-            Right(MonthSurplus(d.getYear, d.getMonth, s.income, s.spend))
+            Right(
+              MonthSurplus(
+                d.getYear,
+                d.getMonth,
+                s.income,
+                s.spend,
+                s.repayments,
+                s.refunds
+              )
+            )
         }
       }
     }
@@ -46,8 +65,9 @@ class SurplusCalculator(transactions: Set[Transaction]) {
   def surplus(r: DateRange): Either[String, Surplus] = {
 
     def sum(p: Transaction => Boolean): Amount =
-      inDateRange(r).foldLeft(Amount(0)) { case (soFar, t) =>
-        if (p(t)) soFar plus t.amount else soFar
+      inDateRange(r).foldLeft(Amount(0)) {
+        case (soFar, t) =>
+          if (p(t)) soFar plus t.amount else soFar
       }
 
     if (transactions.exists(_.isUncategorised))
@@ -56,7 +76,9 @@ class SurplusCalculator(transactions: Set[Transaction]) {
       Right(
         Surplus(
           income = sum(_.isIncome),
-          spend = sum(t => t.isSpend || t.isRepayment || t.isRefund).neg
+          spend = sum(_.isSpend).neg,
+          repayments = sum(_.isRepayment).neg,
+          refunds = sum(_.isRefund)
         )
       )
   }

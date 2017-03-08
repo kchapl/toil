@@ -1,21 +1,23 @@
 package controllers
 
-import model.AccountHandler.{account, allAccounts}
+import controllers.Helper.{allAccounts, allTransactions}
+import model.Account.byName
+import model.{Account, AccountAndTransactions}
 import play.api.mvc.Controller
-import services.GoogleSheet
 
 class AccountController extends Controller {
 
   def viewAccounts = AuthorisedAction { implicit request =>
-    val userId = request.session(UserId.key)
-    val accounts = allAccounts(GoogleSheet(userId).fetchAllRows).toSeq
+    implicit val userId = request.session(UserId.key)
+    val accounts = allAccounts
     Ok(views.html.accounts(accounts))
   }
 
   def viewAccount(name: String) = AuthorisedAction { implicit request =>
-    val userId = request.session(UserId.key)
-    account(name)(GoogleSheet(userId).fetchAllRows) map { a =>
-      Ok(views.html.account(a))
+    implicit val userId = request.session(UserId.key)
+    allAccounts find byName(name) map { a =>
+      val ts = allTransactions filter (_.account.toLowerCase == name.toLowerCase)
+      Ok(views.html.account(AccountAndTransactions(a, ts.toSet)))
     } getOrElse {
       BadRequest(s"No account $name")
     }

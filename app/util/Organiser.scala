@@ -1,6 +1,8 @@
-package model
+package util
 
 import java.time.LocalDate
+
+import model.Transaction
 
 object Organiser {
 

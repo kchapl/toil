@@ -1,4 +1,4 @@
-package model
+package services
 
 case class Sheet(name: String, numCols: Int) {
   val range: String = {
@@ -6,4 +6,3 @@ case class Sheet(name: String, numCols: Int) {
     s"$name!A:$endColumn"
   }
 }
-

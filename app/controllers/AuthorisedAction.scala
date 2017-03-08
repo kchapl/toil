@@ -4,11 +4,11 @@ import java.math.BigInteger
 import java.net.URLEncoder
 import java.security.SecureRandom
 
-import model.Config.redirectUri
-import model.Flow
+import util.Config.redirectUri
 import play.api.mvc.Codec.utf_8
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
+import util.Flow
 
 import scala.concurrent.Future
 

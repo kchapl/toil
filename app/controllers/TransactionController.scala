@@ -1,46 +1,65 @@
 package controllers
 
-import model.TransactionHandler.allTransactions
-import model.{Organiser, Transaction, TransactionHandler}
+import controllers.Helper.{allAccounts, allTransactions, transactionSheet}
+import model.Transaction
 import play.api.mvc.Controller
 import services.GoogleSheet
+import util.Organiser
 
 import scala.io.Source
 
 class TransactionController extends Controller {
 
+  private def toRow(tx: Transaction) = Seq(
+    tx.account,
+    tx.date.toString,
+    tx.payee,
+    tx.reference getOrElse "",
+    tx.mode getOrElse "",
+    tx.amount.pounds.toString,
+    tx.category
+  )
+
   def viewTransactions = AuthorisedAction { implicit request =>
-    val userId = request.session(UserId.key)
-    val txs = allTransactions(GoogleSheet(userId).fetchAllRows).toSeq
-    val organised = Organiser.organise(txs, request.queryString)
+    implicit val userId = request.session(UserId.key)
+    val organised = Organiser.organise(allTransactions, request.queryString)
     Ok(views.html.transactions(organised))
   }
 
-  //noinspection TypeAnnotation
-  def uploadTransactions = AuthorisedAction(parse.multipartFormData) { implicit request =>
-    request.body.file("transactions").map { filePart =>
-      val accountName = request.body.dataParts("account").head
-      val source = Source.fromFile(filePart.ref.file)
-      val userId = request.session(UserId.key)
-      val sheet = GoogleSheet(userId)
-      TransactionHandler.uploadTransactions(
-        accountName,
-        source
-      )(sheet.fetchAllRows)(sheet.appendRows)
-      Redirect(routes.TransactionController.viewTransactions())
+  def viewImportTransactions() = AuthorisedAction { request =>
+    implicit val userId = request.session(UserId.key)
+    Ok(views.html.transactionsImport(allAccounts))
+  }
+
+  def importTransactions = AuthorisedAction(parse.multipartFormData) { implicit request =>
+    request.body.file("transactions") map { filePart =>
+      implicit val userId = request.session(UserId.key)
+      Transaction.toImport(
+        before = allTransactions.toSet,
+        accounts = allAccounts.toSet,
+        accountName = request.body.dataParts("account").head,
+        source = Source.fromFile(filePart.ref.file)
+      ) match {
+        case Left(f) => InternalServerError(f.description)
+        case Right(ts) =>
+          GoogleSheet.appendRows(
+            transactionSheet,
+            rows = ts.map(toRow).toSeq
+          )
+          Redirect(routes.TransactionController.viewTransactions())
+      }
     } getOrElse {
-      Ok("File upload failed")
+      InternalServerError("Transaction import failed")
     }
   }
 
-  def viewUploadTransactions() = AuthorisedAction {
-    Ok(views.html.transactionsUpload())
-  }
-
   def dedup = AuthorisedAction { implicit request =>
-    Transaction.dedup(request.session(UserId.key)) match {
+    implicit val userId = request.session(UserId.key)
+    val deduped = allTransactions.distinct
+    GoogleSheet.replaceAllRows(transactionSheet, deduped.map(toRow)) match {
       case Left(msg) => InternalServerError(msg)
-      case _ => Redirect(routes.TransactionController.viewTransactions())
+      case Right(_) =>
+        Redirect(routes.TransactionController.viewTransactions())
     }
   }
 }

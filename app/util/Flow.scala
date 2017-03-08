@@ -1,11 +1,11 @@
-package model
+package util
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.store.FileDataStoreFactory
 import com.google.api.services.sheets.v4.SheetsScopes.{SPREADSHEETS, SPREADSHEETS_READONLY}
-import model.Config.{clientId, clientSecret, fileStore}
+import util.Config.{clientId, clientSecret, fileStore}
 
 import scala.collection.JavaConverters._
 
