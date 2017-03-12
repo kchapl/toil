@@ -2,15 +2,15 @@
 
 @frame(title = "Transactions Import", highlightedNavItem = "Import") {
   @helper.form(action = routes.TransactionController.importTransactions, 'enctype -> "multipart/form-data") {
-    <select>
-      @for(a <- as) {
-        <option value="account">@a.name</option>
-      }
+    <select name="account" title="Account name">
+    @for(a <- as) {
+      <option value="@a.name">@a.name</option>
+    }
     </select>
     <br />
     <input type="file" name="transactions"/>
     <p>
-        <input type="submit">
+      <input type="submit">
     </p>
   }
 }
