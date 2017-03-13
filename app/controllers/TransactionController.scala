@@ -20,7 +20,7 @@ class TransactionController extends Controller {
     tx.category
   )
 
-  def viewTransactions = AuthorisedAction { implicit request =>
+  def viewTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
     val organised = Organiser.organise(allTransactions, request.queryString)
     Ok(views.html.transactions(organised))
@@ -31,7 +31,7 @@ class TransactionController extends Controller {
     Ok(views.html.transactionsImport(allAccounts))
   }
 
-  def importTransactions = AuthorisedAction(parse.multipartFormData) { implicit request =>
+  def importTransactions() = AuthorisedAction(parse.multipartFormData) { request =>
     request.body.file("transactions") map { filePart =>
       implicit val userId = request.session(UserId.key)
       Transaction.toImport(
@@ -53,7 +53,13 @@ class TransactionController extends Controller {
     }
   }
 
-  def dedup = AuthorisedAction { implicit request =>
+  def editTransactions() = AuthorisedAction { request =>
+    implicit val userId = request.session(UserId.key)
+
+    Ok
+  }
+
+  def dedupTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
     val deduped = allTransactions.distinct
     GoogleSheet.replaceAllRows(transactionSheet, deduped.map(toRow)) match {

@@ -5,7 +5,7 @@ import java.time.LocalDate
 import model.Account.byName
 import util.Failure
 
-import scala.io.{BufferedSource, Source}
+import scala.io.Source
 
 case class Transaction(
     account: String,
@@ -17,7 +17,7 @@ case class Transaction(
     category: String
 ) {
 
-  override def equals(obj: scala.Any): Boolean = obj match {
+  override def equals(obj: Any) = obj match {
     case other: Transaction =>
       other.account == account &&
         other.date == date &&
@@ -28,7 +28,7 @@ case class Transaction(
     case _ => false
   }
 
-  override def hashCode(): Int =
+  override def hashCode() =
     account.hashCode +
       date.hashCode +
       payee.hashCode +
@@ -54,14 +54,17 @@ object Transaction {
     def parse(line: String) = account.accType match {
       case Current => TransactionParser.parseCurrentLine(account.name)(line)
       case Credit => TransactionParser.parseCreditLine(account.name)(line)
+      case Savings => TransactionParser.parseCurrentLine(account.name)(line)
     }
     source.getLines().toSet map parse
   }
 
-  def toImport(before: Set[Transaction],
-               accounts: Set[Account],
-               accountName: String,
-               source: Source): Either[Failure, Set[Transaction]] =
+  def toImport(
+      before: Set[Transaction],
+      accounts: Set[Account],
+      accountName: String,
+      source: Source
+  ): Either[Failure, Set[Transaction]] =
     accounts.find(byName(accountName)) map { a =>
       Right(parsed(a, source) -- before)
     } getOrElse Left(Failure(s"No such account: $accountName"))

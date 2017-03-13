@@ -1,25 +1,36 @@
 @(transactions: Seq[model.Transaction])
 
-    @frame(title = "Transactions", highlightedNavItem = "Transactions") {
-        <table>
-            <tr>
-                <td>Account</td>
-                <td>Date</td>
-                <td>Payee</td>
-                <td>Reference</td>
-                <td>Mode</td>
-                <td>Amount</td>
-            </tr>
-            @for(tx <- transactions) {
-                <tr>
-                    <td>@tx.account</td>
-                    <td>@tx.date</td>
-                    <td>@tx.payee</td>
-                    <td>@tx.reference</td>
-                    <td>@tx.mode</td>
-                    <td>@tx.amount.formatted</td>
-                    <td>@tx.category</td>
-                </tr>
-            }
-        </table>
+@frame(title = "Transactions", highlightedNavItem = "Transactions") {
+@helper.form(action = routes.TransactionController.editTransactions) {
+  <table>
+    <tr>
+      <td>Account</td>
+      <td>Date</td>
+      <td>Payee</td>
+      <td>Reference</td>
+      <td>Mode</td>
+      <td>Amount</td>
+    </tr>
+    @for(tx <- transactions) {
+    <tr>
+      <td>@tx.account</td>
+      <td>@tx.date</td>
+      <td>@tx.payee</td>
+      <td>@tx.reference</td>
+      <td>@tx.mode</td>
+      <td>@tx.amount.formatted</td>
+      <td>
+        <select name="@tx.hashCode">
+          <option value="@tx.category">@tx.category</option>
+          <option value="other">other</option>
+        </select>
+      </td>
+    </tr>
     }
+    <tr>
+      <td colspan="7" align="right">
+        <input type="submit" value="Save">
+      </td>
+    </tr>
+  </table>
+}}

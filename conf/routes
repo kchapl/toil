@@ -8,10 +8,11 @@ GET         /accounts                   controllers.AccountController.viewAccoun
 GET         /account/:name              controllers.AccountController.viewAccount(name)
 
 GET         /transactions               controllers.TransactionController.viewTransactions()
+POST        /transactions/edit          controllers.TransactionController.editTransactions()
 GET         /transactions/import        controllers.TransactionController.viewImportTransactions()
 POST        /transactions/import        controllers.TransactionController.importTransactions()
 
 GET         /surplus                    controllers.SurplusController.viewSurplus()
 GET         /surplusFigs                controllers.SurplusController.viewSurplusFigures()
 
-GET         /fix/dedup                  controllers.TransactionController.dedup()
+GET         /fix/dedup                  controllers.TransactionController.dedupTransactions()
