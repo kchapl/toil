@@ -2,7 +2,7 @@ package controllers
 
 import java.time.LocalDate
 
-import model.{Account, AccountType, Amount, Transaction}
+import model._
 import services.{GoogleSheet, Row, Sheet}
 import util.Util.opt
 
@@ -25,7 +25,7 @@ object Helper {
     reference = opt(r(3)),
     mode = opt(r(4)),
     amount = Amount.fromString(r(5)),
-    category = r(6)
+    category = Category.fromCode(r(6))
   )
 
   def allAccounts(implicit userId: String) =

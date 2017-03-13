@@ -1,4 +1,5 @@
 @(transactions: Seq[model.Transaction])
+@import model.Category
 
 @frame(title = "Transactions", highlightedNavItem = "Transactions") {
 @helper.form(action = routes.TransactionController.editTransactions) {
@@ -21,8 +22,9 @@
       <td>@tx.amount.formatted</td>
       <td>
         <select name="@tx.hashCode">
-          <option value="@tx.category">@tx.category</option>
-          <option value="other">other</option>
+        @for(c <- Category.all) {
+          <option value="@c" @if(c == tx.category){selected}>@c</option>
+        }
         </select>
       </td>
     </tr>

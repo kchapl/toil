@@ -17,7 +17,7 @@ class TransactionController extends Controller {
     tx.reference getOrElse "",
     tx.mode getOrElse "",
     tx.amount.pounds.toString,
-    tx.category
+    tx.category.code
   )
 
   def viewTransactions() = AuthorisedAction { request =>
@@ -55,6 +55,8 @@ class TransactionController extends Controller {
 
   def editTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
+
+    println(request.body.asFormUrlEncoded)
 
     Ok
   }

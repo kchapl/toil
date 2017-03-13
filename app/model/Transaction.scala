@@ -14,7 +14,7 @@ case class Transaction(
     reference: Option[String],
     mode: Option[String],
     amount: Amount,
-    category: String
+    category: Category
 ) {
 
   override def equals(obj: Any) = obj match {
@@ -36,19 +36,15 @@ case class Transaction(
       mode.hashCode +
       amount.hashCode
 
-  val isTransfer: Boolean = category == "T"
-  val isIncome: Boolean = category == "I"
-  val isSpend: Boolean = category == "S"
-  val isRepayment: Boolean = category == "R"
-  val isRefund: Boolean = category == "B"
-  val isUncategorised: Boolean = category == Transaction.Category.uncategorised
+  val isTransfer: Boolean = category == Transfer
+  val isIncome: Boolean = category == Income
+  val isSpend: Boolean = category == Spend
+  val isRepayment: Boolean = category == Repayment
+  val isRefund: Boolean = category == Refund
+  val isUncategorised: Boolean = category == Uncategorised
 }
 
 object Transaction {
-
-  object Category {
-    val uncategorised = "U"
-  }
 
   def parsed(account: Account, source: Source): Set[Transaction] = {
     def parse(line: String) = account.accType match {
