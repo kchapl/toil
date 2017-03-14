@@ -64,4 +64,7 @@ object Transaction {
     accounts.find(byName(accountName)) map { a =>
       Right(parsed(a, source) -- before)
     } getOrElse Left(Failure(s"No such account: $accountName"))
+
+  def fromHashcode(ts: Seq[Transaction])(hashCode: Int): Option[Transaction] =
+    ts.find(_.hashCode == hashCode)
 }

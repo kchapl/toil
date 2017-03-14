@@ -23,7 +23,7 @@
       <td>
         <select name="@tx.hashCode">
         @for(c <- Category.all) {
-          <option value="@c" @if(c == tx.category){selected}>@c</option>
+          <option value="@c.code" @if(c == tx.category){selected}>@c.name</option>
         }
         </select>
       </td>

@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.Helper.{allAccounts, allTransactions, transactionSheet}
-import model.Transaction
+import model.{Category, Transaction}
 import play.api.mvc.Controller
 import services.GoogleSheet
 import util.Organiser
@@ -56,9 +56,23 @@ class TransactionController extends Controller {
   def editTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
 
-    println(request.body.asFormUrlEncoded)
+    val ts = allTransactions
+    val submitted = request.body.asFormUrlEncoded map {
+      _ flatMap {
+        case (hashCode, categoryCodes) =>
+          Transaction.fromHashcode(ts)(hashCode.toInt) map {
+            _.copy(category = Category.fromCode(categoryCodes.head))
+          }
+      }
+    } getOrElse Nil
 
-    Ok
+    if (submitted.map(_.category) != ts.map(_.category)) {
+      GoogleSheet.replaceAllRows(transactionSheet, submitted.toSeq.map(toRow)) match {
+        case Left(msg) => InternalServerError(msg)
+        case Right(_) =>
+          Redirect(routes.TransactionController.viewTransactions())
+      }
+    } else Redirect(routes.TransactionController.viewTransactions())
   }
 
   def dedupTransactions() = AuthorisedAction { request =>
