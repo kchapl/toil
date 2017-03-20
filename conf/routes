@@ -11,6 +11,8 @@ GET         /transactions               controllers.TransactionController.viewTr
 POST        /transactions/edit          controllers.TransactionController.editTransactions()
 GET         /transactions/import        controllers.TransactionController.viewImportTransactions()
 POST        /transactions/import        controllers.TransactionController.importTransactions()
+GET         /transactions/add           controllers.TransactionController.viewAddTransaction()
+POST        /transactions/add           controllers.TransactionController.addTransaction()
 
 GET         /surplus                    controllers.SurplusController.viewSurplus()
 GET         /surplusFigs                controllers.SurplusController.viewSurplusFigures()

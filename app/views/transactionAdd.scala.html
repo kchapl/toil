@@ -1,0 +1,48 @@
+@import model.Category
+@(form: Form[TransactionBinding], as: Seq[model.Account])(implicit messages: Messages)
+
+@frame(title = "Add transaction", highlightedNavItem = "Add") {
+  @if(form.hasGlobalErrors) {
+  <ul>
+  @for(error <- form.globalErrors) {
+    <li>@Messages(error.messages, error.args)</li>
+  }
+  </ul>
+  }
+  @helper.form(action = routes.TransactionController.addTransaction) {
+    @helper.select(
+      form("account"),
+      options = as.map(a => a.name -> a.name),
+      '_label -> "Account"
+    )<br />
+    @helper.inputDate(
+      form("date"),
+      '_label -> "Date",
+      '_help -> ""
+    )<br />
+    @helper.inputText(
+      form("payee"),
+      '_label -> "Payee"
+    )<br />
+    @helper.inputText(
+      form("reference"),
+      '_label -> "Reference"
+    )<br />
+    @helper.inputText(
+      form("mode"),
+      '_label -> "Mode"
+    )<br />
+    @helper.inputText(
+      form("amount"),
+      '_label -> "Amount"
+    )<br />
+    @helper.select(
+      form("category"),
+      options = Category.all.map(c => c.code -> c.name),
+      '_label -> "Category"
+    )<br />
+    <p>
+      <input type="submit">
+    </p>
+  }
+}

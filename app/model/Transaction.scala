@@ -1,7 +1,8 @@
 package model
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZoneId}
 
+import controllers.TransactionBinding
 import model.Account.byName
 import util.Failure
 
@@ -67,4 +68,14 @@ object Transaction {
 
   def fromHashcode(ts: Seq[Transaction])(hashCode: Int): Option[Transaction] =
     ts.find(_.hashCode == hashCode)
+
+  def fromBinding(b: TransactionBinding) = Transaction(
+    account = b.account,
+    date = b.date.toInstant.atZone(ZoneId.systemDefault).toLocalDate,
+    payee = b.payee,
+    reference = b.reference,
+    mode = b.mode,
+    amount = Amount.fromString(b.amount),
+    category = Category.fromCode(b.category)
+  )
 }

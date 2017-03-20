@@ -1,6 +1,6 @@
 @(as: Seq[model.Account])
 
-@frame(title = "Transactions Import", highlightedNavItem = "Import") {
+@frame(title = "Import transactions", highlightedNavItem = "Import") {
   @helper.form(action = routes.TransactionController.importTransactions, 'enctype -> "multipart/form-data") {
     <select name="account" title="Account name">
     @for(a <- as) {

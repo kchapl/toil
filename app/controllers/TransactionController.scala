@@ -1,14 +1,19 @@
 package controllers
 
+import javax.inject.Inject
+
 import controllers.Helper.{allAccounts, allTransactions, transactionSheet}
-import model.{Category, Transaction}
+import model.{Category, Transaction, Uncategorised}
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Controller
 import services.GoogleSheet
 import util.Organiser
 
 import scala.io.Source
 
-class TransactionController extends Controller {
+class TransactionController @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
 
   private def toRow(tx: Transaction) = Seq(
     tx.account,
@@ -73,6 +78,30 @@ class TransactionController extends Controller {
           Redirect(routes.TransactionController.viewTransactions())
       }
     } else Redirect(routes.TransactionController.viewTransactions())
+  }
+
+  val transactionForm = Form(
+    mapping(
+      "account" -> text,
+      "date" -> date,
+      "payee" -> text,
+      "reference" -> optional(text),
+      "mode" -> optional(text),
+      "amount" -> text,
+      "category" -> default(text, Uncategorised.code)
+    )(TransactionBinding.apply)(TransactionBinding.unapply)
+  )
+
+  def viewAddTransaction = AuthorisedAction { implicit request =>
+    implicit val userId = request.session(UserId.key)
+    Ok(views.html.transactionAdd(transactionForm, allAccounts))
+  }
+
+  def addTransaction() = AuthorisedAction(parse.form(transactionForm)) { request =>
+    implicit val userId = request.session(UserId.key)
+    val transaction = Transaction.fromBinding(request.body)
+    GoogleSheet.appendRows(transactionSheet, Seq(toRow(transaction)))
+    Redirect(routes.TransactionController.viewTransactions())
   }
 
   def dedupTransactions() = AuthorisedAction { request =>

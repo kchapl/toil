@@ -36,7 +36,7 @@ case object Uncategorised extends Category {
 }
 
 object Category {
-  val all = Seq(Income, Spend, Transfer, Repayment, Refund, Uncategorised)
+  val all = Seq(Uncategorised, Income, Spend, Transfer, Repayment, Refund)
 
   def fromCode(code: String) = code match {
     case Income.`code` => Income

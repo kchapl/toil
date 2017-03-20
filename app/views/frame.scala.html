@@ -47,7 +47,8 @@
                     </ul>
                     <ul class="nav nav-sidebar">
                         @nav("Transactions", controllers.routes.TransactionController.viewTransactions())
-                        @nav("Import", controllers.routes.TransactionController.importTransactions())
+                        @nav("Import", controllers.routes.TransactionController.viewImportTransactions())
+                        @nav("Add", controllers.routes.TransactionController.viewAddTransaction())
                         @nav("Surplus", controllers.routes.SurplusController.viewSurplus())
                     </ul>
                 </div>
