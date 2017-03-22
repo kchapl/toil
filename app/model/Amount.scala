@@ -19,6 +19,8 @@ case class Amount(pence: Int) {
 
 object Amount {
 
+  val zero = Amount(0)
+
   def fromString(s: String): Amount = Amount((BigDecimal(s) * 100).toInt)
 
   def sum(as: Seq[Amount]): Amount = as.foldLeft(Amount(0)) { case (acc, b) => acc.plus(b) }

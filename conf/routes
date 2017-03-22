@@ -15,6 +15,5 @@ GET         /transactions/add           controllers.TransactionController.viewAd
 POST        /transactions/add           controllers.TransactionController.addTransaction()
 
 GET         /surplus                    controllers.SurplusController.viewSurplus()
-GET         /surplusFigs                controllers.SurplusController.viewSurplusFigures()
 
 GET         /fix/dedup                  controllers.TransactionController.dedupTransactions()

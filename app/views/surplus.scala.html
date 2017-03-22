@@ -1,76 +1,26 @@
-@import model.MonthSurplus
-@(surpluses: Seq[MonthSurplus])
+@(surpluses: model.Surpluses)
 
-@colour(posColour: String, negColour: String) = {[
-  @Html(surpluses.map(s => {
-    if (s.surplus.isPos) s"'$posColour'"
-    else s"'$negColour'"
-  }).mkString(", "))
-]}
-
-@backgroundColour = {@colour("#32cd32", "#ff4500")}
-
-@borderColour = {@colour("#006400", "#8b0000")}
+@chart(title: String, labels: Seq[String], figures: Seq[model.SurplusFigures]) = {
+  <div class="panel panel-default">
+    <div class="panel-heading">@title</div>
+    <div class="panel-body">
+      <canvas id="monthly-chart"
+        width="200" height="200"
+        data-labels="[@labels.mkString("\"", "\",\"", "\"")]"
+        data-surplus="[@figures.map(_.surplus.pounds).mkString(",")]"
+        data-income="[@figures.map(_.income.pounds).mkString(",")]"
+        data-spend="[@figures.map(_.totalSpend.neg.pounds).mkString(",")]"
+      </canvas>
+    </div>
+  </div>
+}
 
 @frame(title = "Surplus", highlightedNavItem = "Surplus") {
 
-  <div class="panel panel-default">
-    <div class="panel-body">
-      <canvas id="chart" width="200" height="200"></canvas>
-    </div>
-  </div>
+  @chart("Monthly", surpluses.monthly.map(_.yearMonth.getMonth.toString), surpluses.monthly.map(_.figures))
+
+  @chart("Seasonal", surpluses.seasonal.map(_.yearSeason.toString), surpluses.seasonal.map(_.figures))
 
   <script type="text/javascript" src="@routes.Assets.at("javascripts/Chart.bundle.js")"></script>
-  <script type="text/javascript">
-    new Chart(document.getElementById("chart"), {
-      type: 'bar',
-      data: {
-        labels: [@Html(surpluses.map(_.month).mkString("'", "', '", "'"))],
-        datasets: [
-          {
-            type: 'line',
-            data: [@surpluses.map(_.surplus.pounds).mkString(", ")],
-            fill: false,
-            borderColor: '#000000',
-            borderWidth: 4
-          },
-          {
-            data: [@surpluses.map(_.income.pounds).mkString(", ")],
-            backgroundColor: @backgroundColour,
-            borderColor: @borderColour,
-            borderWidth: 3
-          },
-          {
-            data: [@surpluses.map(_.spend.neg.pounds).mkString(", ")],
-            backgroundColor: @backgroundColour,
-            borderColor: @borderColour,
-            borderWidth: 3
-          }
-        ]
-      },
-      options: {
-        title: {
-          display: true,
-          text: 'Monthly'
-        },
-        legend: {
-          display: false
-        },
-        scales: {
-          xAxes: [{
-            stacked: true
-          }],
-          yAxes: [{
-            ticks: {
-              beginAtZero: true
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'pounds'
-            }
-          }]
-        }
-      }
-    });
-  </script>
+  <script type="text/javascript" src="@routes.Assets.at("javascripts/surplus.js")"></script>
 }
