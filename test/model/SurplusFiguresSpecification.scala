@@ -1,25 +1,37 @@
 package model
 
+import model.AmountGenerator._
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.forAll
-import org.scalacheck.{Arbitrary, Gen, Properties}
+import org.scalacheck.Shrink.shrink
+import org.scalacheck.{Arbitrary, Properties, Shrink}
 
 object SurplusFiguresSpecification extends Properties("SurplusFigures") {
 
-  val arbInt = Arbitrary { Gen.choose(-1000000, 1000000) }.arbitrary
-  val posInt = Arbitrary { Gen.choose(0, 1000000) }.arbitrary
-  val negInt = Arbitrary { Gen.choose(-1000000, 0) }.arbitrary
-
-  val genAmount: Gen[Amount] = for (pence <- arbInt) yield Amount(pence)
-  val genPosAmount: Gen[Amount] = for (pence <- posInt) yield Amount(pence)
-  val genNegAmount: Gen[Amount] = for (pence <- negInt) yield Amount(pence)
-
   implicit lazy val arbSurplusFigures: Arbitrary[SurplusFigures] = Arbitrary {
     for {
-      income <- genPosAmount
-      spend <- genNegAmount
-      repayments <- genNegAmount
-      refunds <- genPosAmount
-      uncategorised <- genAmount
+      income <- arbitrary[Amount]
+      spend <- arbitrary[Amount]
+      repayments <- arbitrary[Amount]
+      refunds <- arbitrary[Amount]
+      uncategorised <- arbitrary[Amount]
+    } yield
+      SurplusFigures(
+        income,
+        spend,
+        repayments,
+        refunds,
+        uncategorised
+      )
+  }
+
+  implicit def shrinkSurplusFigures(implicit s: Shrink[SurplusFigures]): Shrink[SurplusFigures] = Shrink { figures =>
+    for {
+      income <- shrink(figures.income)
+      spend <- shrink(figures.spend)
+      repayments <- shrink(figures.repayments)
+      refunds <- shrink(figures.refunds)
+      uncategorised <- shrink(figures.uncategorised)
     } yield
       SurplusFigures(
         income,
@@ -31,6 +43,6 @@ object SurplusFiguresSpecification extends Properties("SurplusFigures") {
   }
 
   property("totalSpend") = forAll { figures: SurplusFigures =>
-    figures.totalSpend.isNeg
+    figures.totalSpend != Amount.zero
   }
 }

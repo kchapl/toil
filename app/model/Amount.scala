@@ -2,13 +2,7 @@ package model
 
 case class Amount(pence: Int) {
 
-  val isPos: Boolean = pence > 0
-  val isNeg: Boolean = pence < 0
-
-  def abs: Amount = Amount(pence.abs)
-  def neg: Amount = Amount(-pence)
-
-  def op(a: Amount)(f: (Int, Int) => Int): Amount = Amount(f(pence, a.pence))
+  private def op(a: Amount)(f: (Int, Int) => Int): Amount = Amount(f(pence, a.pence))
 
   def plus(a: Amount): Amount = op(a) { _ + _ }
   def minus(a: Amount): Amount = op(a) { _ - _ }

@@ -7,10 +7,7 @@ case class Surpluses(
   monthly: Seq[MonthSurplus],
   seasonal: Seq[SeasonSurplus]
 ) {
-  def hasUncategorised = monthly.exists { monthSurplus =>
-    val uncategorised = monthSurplus.figures.uncategorised
-    uncategorised.isPos || uncategorised.isNeg
-  }
+  def hasUncategorised = monthly.exists { _.figures.uncategorised != Amount.zero }
 }
 
 object Surpluses {

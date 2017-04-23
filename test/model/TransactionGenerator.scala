@@ -1,6 +1,10 @@
 package model
 
+import java.time.LocalDate
+
+import model.AmountGenerator._
 import model.time.DateGenerator._
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
 object TransactionGenerator {
@@ -10,11 +14,11 @@ object TransactionGenerator {
   private val genTransaction: Gen[Transaction] =
     for {
       account <- Gen.alphaStr
-      date <- genDateIn21stCentury
+      date <- arbitrary[LocalDate]
       payee <- Gen.alphaStr
       reference <- Gen.option(Gen.alphaStr)
       mode <- Gen.option(Gen.alphaStr)
-      pence <- Gen.chooseNum(0, 1000000)
+      amount <- arbitrary[Amount]
       category <- genCategory
     } yield
       Transaction(
@@ -23,7 +27,7 @@ object TransactionGenerator {
         payee,
         reference,
         mode,
-        Amount(pence),
+        amount,
         category
       )
 

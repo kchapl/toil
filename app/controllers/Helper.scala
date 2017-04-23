@@ -18,13 +18,15 @@ object Helper {
     originalBalance = Amount.fromString(r(2))
   )
 
+  private def abs(amountText: String) = amountText.stripPrefix("-")
+
   private def toTransaction(r: Row) = Transaction(
     account = r.head,
     date = LocalDate.parse(r(1)),
     payee = r(2),
     reference = opt(r(3)),
     mode = opt(r(4)),
-    amount = Amount.fromString(r(5)),
+    amount = Amount.fromString(abs(r(5))),
     category = Category.fromCode(r(6))
   )
 

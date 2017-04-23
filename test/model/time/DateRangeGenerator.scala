@@ -1,6 +1,9 @@
 package model.time
 
+import java.time.LocalDate
+
 import model.time.DateGenerator._
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop._
 import org.scalacheck.Shrink.shrink
 import org.scalacheck.{Arbitrary, Gen, Shrink}
@@ -9,8 +12,8 @@ object DateRangeGenerator {
 
   private val genDateRangeIn21stCentury: Gen[DateRange] =
     for {
-      d1 <- genDateIn21stCentury
-      d2 <- genDateIn21stCentury
+      d1 <- arbitrary[LocalDate]
+      d2 <- arbitrary[LocalDate]
       isD1Earlier = d1.compareTo(d2) < 0
       start = if (isD1Earlier) d1 else d2
       end = if (isD1Earlier) d2 else d1
