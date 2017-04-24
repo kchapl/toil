@@ -9,7 +9,7 @@
         data-labels="[@labels.mkString("\"", "\",\"", "\"")]"
         data-surplus="[@figures.map(_.surplus.pounds).mkString(",")]"
         data-income="[@figures.map(_.income.pounds).mkString(",")]"
-        data-spend="[@figures.map(_.totalSpend.pounds).mkString(",")]"
+        data-spend="[@figures.map(_.totalSpend.neg.pounds).mkString(",")]"
       </canvas>
     </div>
   </div>
@@ -17,9 +17,17 @@
 
 @frame(title = "Surplus", highlightedNavItem = "Surplus") {
 
-  @chart("Monthly", surpluses.monthly.map(_.yearMonth.getMonth.toString), surpluses.monthly.map(_.figures))
+  @chart(
+    title = "Monthly",
+    labels = surpluses.monthly.map(_.yearMonth.getMonth.toString),
+    figures = surpluses.monthly.map(_.figures)
+  )
 
-  @chart("Seasonal", surpluses.seasonal.map(_.yearSeason.toString), surpluses.seasonal.map(_.figures))
+  @chart(
+    title = "Seasonal",
+    labels = surpluses.seasonal.map(_.yearSeason.toString),
+    figures = surpluses.seasonal.map(_.figures)
+  )
 
   <script type="text/javascript" src="@routes.Assets.at("javascripts/Chart.bundle.js")"></script>
   <script type="text/javascript" src="@routes.Assets.at("javascripts/surplus.js")"></script>
