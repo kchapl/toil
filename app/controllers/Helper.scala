@@ -30,22 +30,9 @@ object Helper {
     category = Category.fromCode(r(6))
   )
 
-  private def toAbsTransaction(r: Row) = Transaction(
-    account = r.head,
-    date = LocalDate.parse(r(1)),
-    payee = r(2),
-    reference = opt(r(3)),
-    mode = opt(r(4)),
-    amount = Amount.fromString(abs(r(5))),
-    category = Category.fromCode(r(6))
-  )
-
   def allAccounts(implicit userId: String) =
     GoogleSheet.allRows(accountSheet).map(toAccount)
 
   def allTransactions(implicit userId: String) =
     GoogleSheet.allRows(transactionSheet).map(toTransaction)
-
-  def allAbsTransactions(implicit userId: String) =
-    GoogleSheet.allRows(transactionSheet).map(toAbsTransaction)
 }

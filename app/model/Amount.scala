@@ -7,6 +7,7 @@ case class Amount(pence: Int) {
   def plus(a: Amount): Amount = op(a) { _ + _ }
   def minus(a: Amount): Amount = op(a) { _ - _ }
 
+  def abs: Amount = Amount(pence.abs)
   def neg: Amount = Amount(-pence)
 
   def pounds: Double = (BigDecimal(pence) / 100).toDouble

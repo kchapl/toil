@@ -15,7 +15,7 @@ object SurplusFigures {
 
   def fromTransactions(ts: Seq[Transaction]): SurplusFigures = {
 
-    def sum(p: Transaction => Boolean) = ts.filter(p).map(_.amount).foldLeft(Amount.zero)(_ plus _)
+    def sum(p: Transaction => Boolean) = ts.filter(p).map(_.amount.abs).foldLeft(Amount.zero)(_ plus _)
 
     SurplusFigures(
       income = sum(_.isIncome),
