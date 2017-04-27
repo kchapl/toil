@@ -2,19 +2,26 @@ package model
 
 case class Amount(pence: Int) {
 
+  val isPos: Boolean = pence > 0
+  val isNeg: Boolean = pence < 0
+
   private def op(a: Amount)(f: (Int, Int) => Int): Amount = Amount(f(pence, a.pence))
 
   def plus(a: Amount): Amount = op(a) { _ + _ }
   def minus(a: Amount): Amount = op(a) { _ - _ }
 
-  def abs: Amount = Amount(pence.abs)
-  def neg: Amount = Amount(-pence)
+  lazy val abs: Amount = Amount(pence.abs)
+  lazy val neg: Amount = Amount(-pence)
 
-  def pounds: Double = (BigDecimal(pence) / 100).toDouble
-  def formatted: String = java.text.NumberFormat.getCurrencyInstance.format(pounds)
+  lazy val pounds: Double = (BigDecimal(pence) / 100).toDouble
+  lazy val formatted: String = java.text.NumberFormat.getCurrencyInstance.format(pounds)
 }
 
 object Amount {
+
+  implicit val amountOrder: Ordering[Amount] = new Ordering[Amount] {
+    def compare(left: Amount, right: Amount): Int = left.pence compare right.pence
+  }
 
   val zero = Amount(0)
 

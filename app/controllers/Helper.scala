@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import model._
 import services.{GoogleSheet, Row, Sheet}
-import util.Util.opt
+import util.Util.asOption
 
 object Helper {
 
@@ -24,8 +24,8 @@ object Helper {
     account = r.head,
     date = LocalDate.parse(r(1)),
     payee = r(2),
-    reference = opt(r(3)),
-    mode = opt(r(4)),
+    reference = asOption(r(3)),
+    mode = asOption(r(4)),
     amount = Amount.fromString(r(5)),
     category = Category.fromCode(r(6))
   )

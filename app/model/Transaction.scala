@@ -5,17 +5,19 @@ import java.time.{LocalDate, ZoneId}
 import controllers.TransactionBinding
 import model.Account.byName
 import util.Failure
+import util.Util.asOption
 
+import scala.annotation.tailrec
 import scala.io.Source
 
 case class Transaction(
-    account: String,
-    date: LocalDate,
-    payee: String,
-    reference: Option[String],
-    mode: Option[String],
-    amount: Amount,
-    category: Category
+  account: String,
+  date: LocalDate,
+  payee: String,
+  reference: Option[String],
+  mode: Option[String],
+  amount: Amount,
+  category: Category
 ) {
 
   override def equals(obj: Any) = obj match {
@@ -57,10 +59,10 @@ object Transaction {
   }
 
   def toImport(
-      before: Set[Transaction],
-      accounts: Set[Account],
-      accountName: String,
-      source: Source
+    before: Set[Transaction],
+    accounts: Set[Account],
+    accountName: String,
+    source: Source
   ): Either[Failure, Set[Transaction]] =
     accounts.find(byName(accountName)) map { a =>
       Right(parsed(a, source) -- before)
@@ -78,4 +80,58 @@ object Transaction {
     amount = Amount.fromString(b.amount),
     category = Category.fromCode(b.category)
   )
+
+  def findAnomalies(transactions: Seq[Transaction]): Option[Seq[Anomaly]] = {
+
+    val findUnbalancedTransfers: Seq[Anomaly] = {
+
+      @tailrec
+      def go(acc: Seq[Anomaly], rest: List[Transaction]): Seq[Anomaly] = {
+        rest match {
+          case hd :: tl =>
+            tl find (_.amount.neg == hd.amount) match {
+              case Some(t) => go(acc, tl.filterNot(_ == t))
+              case None => go(acc :+ UnbalancedTransfer(hd), tl)
+            }
+          case Nil => acc
+        }
+      }
+
+      go(Nil, transactions.filter(_.isTransfer).toList)
+    }
+
+    val findNegativeIncome: Seq[Anomaly] = for {
+      transaction <- transactions
+      if transaction.isIncome && !transaction.amount.isPos
+    } yield NegativeIncome(transaction)
+
+    val findNegativeRefunds: Seq[Anomaly] = for {
+      transaction <- transactions
+      if transaction.isRefund && !transaction.amount.isPos
+    } yield NegativeRefund(transaction)
+
+    val findPositiveSpend: Seq[Anomaly] = for {
+      transaction <- transactions
+      if transaction.isSpend && !transaction.amount.isNeg
+    } yield PositiveSpend(transaction)
+
+    val findPositiveRepayments: Seq[Anomaly] = for {
+      transaction <- transactions
+      if transaction.isRepayment && !transaction.amount.isNeg
+    } yield PositiveRepayment(transaction)
+
+    val findUncategorised: Seq[Anomaly] = for {
+      transaction <- transactions
+      if transaction.isUncategorised
+    } yield UncategorisedTransaction(transaction)
+
+    asOption(
+      findUnbalancedTransfers ++
+        findNegativeIncome ++
+        findNegativeRefunds ++
+        findPositiveSpend ++
+        findPositiveRepayments ++
+        findUncategorised
+    )
+  }
 }

@@ -1,0 +1,16 @@
+@(anomalies: Seq[model.Anomaly])
+
+@frame(title = "Anomalies", highlightedNavItem = "Surplus") {
+<table>
+  <tr>
+    <td>Transaction</td>
+    <td>Reason</td>
+  </tr>
+  @for(a <- anomalies) {
+  <tr>
+    <td>@a.transaction</td>
+    <td>@a.reason</td>
+  </tr>
+  }
+</table>
+}
