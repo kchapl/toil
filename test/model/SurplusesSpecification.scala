@@ -2,7 +2,7 @@ package model
 
 import model.TransactionGenerator._
 import org.scalacheck.Prop._
-import org.scalacheck.Properties
+import org.scalacheck.{Prop, Properties}
 
 object SurplusesSpecification extends Properties("Surpluses") {
 
@@ -18,12 +18,13 @@ object SurplusesSpecification extends Properties("Surpluses") {
     }
   }
 
-  private def totalIncome(transactions: Seq[Transaction]) = Amount.sum(transactions.filter(_.isIncome).map(_.amount))
+  private def totalIncome(transactions: Seq[Transaction]) =
+    Amount.sum(transactions.filter(_.isIncome).map(_.amount.abs))
 
   private def grandTotalSpend(transactions: Seq[Transaction]) = {
-    val totalSpend = Amount.sum(transactions.filter(_.isSpend).map(_.amount))
-    val totalRepayments = Amount.sum(transactions.filter(_.isRepayment).map(_.amount))
-    val totalRefunds = Amount.sum(transactions.filter(_.isRefund).map(_.amount))
+    val totalSpend      = Amount.sum(transactions.filter(_.isSpend).map(_.amount.abs))
+    val totalRepayments = Amount.sum(transactions.filter(_.isRepayment).map(_.amount.abs))
+    val totalRefunds    = Amount.sum(transactions.filter(_.isRefund).map(_.amount.abs))
     totalSpend.plus(totalRepayments).minus(totalRefunds)
   }
 
@@ -31,17 +32,20 @@ object SurplusesSpecification extends Properties("Surpluses") {
 
     val propMonthlyIncome = forAll { transactions: Seq[Transaction] =>
       val totalIncomeAccordingToSurpluses = monthlyAmounts(transactions, { _.income })
-      totalIncomeAccordingToSurpluses == totalIncome(transactions)
+      s"Calculated: $totalIncomeAccordingToSurpluses" |: Prop(
+        totalIncomeAccordingToSurpluses == totalIncome(transactions))
     }
 
     val propSeasonalIncome = forAll { transactions: Seq[Transaction] =>
       val totalIncomeAccordingToSurpluses = seasonalAmounts(transactions, { _.income })
-      totalIncomeAccordingToSurpluses == totalIncome(transactions)
+      s"Calculated: $totalIncomeAccordingToSurpluses" |: Prop(
+        totalIncomeAccordingToSurpluses == totalIncome(transactions))
     }
 
     val propMonthlyTotalSpend = forAll { transactions: Seq[Transaction] =>
       val grandTotalSpendAccordingToSurpluses = monthlyAmounts(transactions, { _.totalSpend })
-      grandTotalSpendAccordingToSurpluses == grandTotalSpend(transactions)
+      s"Calculated: $grandTotalSpendAccordingToSurpluses" |: Prop(
+        grandTotalSpendAccordingToSurpluses == grandTotalSpend(transactions))
     }
 
     val propSeasonalTotalSpend = forAll { transactions: Seq[Transaction] =>
@@ -49,6 +53,11 @@ object SurplusesSpecification extends Properties("Surpluses") {
       grandTotalSpendAccordingToSurpluses == grandTotalSpend(transactions)
     }
 
-    propMonthlyIncome && propSeasonalIncome && propMonthlyTotalSpend && propSeasonalTotalSpend
+    all(
+      "Monthly income" |: propMonthlyIncome,
+      "Seasonal income" |: propSeasonalIncome,
+      "Monthly total spend" |: propMonthlyTotalSpend,
+      "Seasonal total spend" |: propSeasonalTotalSpend
+    )
   }
 }
