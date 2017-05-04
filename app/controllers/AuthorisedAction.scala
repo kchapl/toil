@@ -16,9 +16,10 @@ object AuthorisedAction extends ActionBuilder[Request] with ActionFilter[Request
 
   private def onUnauthorised[A](request: Request[A], userId: String) = {
     def encode(s: String) = URLEncoder.encode(s, utf_8.charset)
-    val securityToken = new BigInteger(130, new SecureRandom()).toString(32)
-    val state = encode(s"securityToken=$securityToken&path=${ request.path }")
-    val uri = Flow.readWrite.newAuthorizationUrl()
+    val securityToken     = new BigInteger(130, new SecureRandom()).toString(32)
+    val state             = encode(s"securityToken=$securityToken&path=${request.path}")
+    val uri = Flow.readWrite
+      .newAuthorizationUrl()
       .setState(state)
       .setRedirectUri(redirectUri)
       .build()
@@ -28,7 +29,12 @@ object AuthorisedAction extends ActionBuilder[Request] with ActionFilter[Request
   override protected def filter[A](request: Request[A]): Future[Option[Result]] =
     Future.successful {
       val userId = UserId(request)
-      Option(Flow.readWrite.loadCredential(userId)) map { _ => None
-      } getOrElse onUnauthorised(request, userId)
+      (for {
+        credential <- Option(Flow.readWrite.loadCredential(userId))
+        if credential.getExpiresInSeconds > 0
+      } yield credential) match {
+        case Some(_) => None
+        case None    => onUnauthorised(request, userId)
+      }
     }
 }
