@@ -39,11 +39,11 @@ case class Transaction(
       mode.hashCode +
       amount.hashCode
 
-  val isTransfer: Boolean = category == Transfer
-  val isIncome: Boolean = category == Income
-  val isSpend: Boolean = category == Spend
-  val isRepayment: Boolean = category == Repayment
-  val isRefund: Boolean = category == Refund
+  val isTransfer: Boolean      = category == Transfer
+  val isIncome: Boolean        = category == Income
+  val isSpend: Boolean         = category == Spend
+  val isRepayment: Boolean     = category == Repayment
+  val isRefund: Boolean        = category == Refund
   val isUncategorised: Boolean = category == Uncategorised
 }
 
@@ -52,7 +52,7 @@ object Transaction {
   def parsed(account: Account, source: Source): Set[Transaction] = {
     def parse(line: String) = account.accType match {
       case Current => TransactionParser.parseCurrentLine(account.name)(line)
-      case Credit => TransactionParser.parseCreditLine(account.name)(line)
+      case Credit  => TransactionParser.parseCreditLine(account.name)(line)
       case Savings => TransactionParser.parseCurrentLine(account.name)(line)
     }
     source.getLines().toSet map parse
@@ -68,8 +68,8 @@ object Transaction {
       Right(parsed(a, source) -- before)
     } getOrElse Left(Failure(s"No such account: $accountName"))
 
-  def fromHashcode(ts: Seq[Transaction])(hashCode: Int): Option[Transaction] =
-    ts.find(_.hashCode == hashCode)
+  def fromHashcode(hashCode: Int)(implicit refs: Seq[Transaction]): Option[Transaction] =
+    refs.find(_.hashCode == hashCode)
 
   def fromBinding(b: TransactionBinding) = Transaction(
     account = b.account,
@@ -81,6 +81,11 @@ object Transaction {
     category = Category.fromCode(b.category)
   )
 
+  def haveChanged(submitted: Iterable[Transaction])(implicit refs: Seq[Transaction]): Boolean =
+    submitted.exists { t =>
+      refs.find(_ == t) exists (_.category != t.category)
+    }
+
   def findAnomalies(transactions: Seq[Transaction]): Option[Seq[Anomaly]] = {
 
     val findUnbalancedTransfers: Seq[Anomaly] = {
@@ -91,7 +96,7 @@ object Transaction {
           case hd :: tl =>
             tl find (_.amount.neg == hd.amount) match {
               case Some(t) => go(acc, tl.filterNot(_ == t))
-              case None => go(acc :+ UnbalancedTransfer(hd), tl)
+              case None    => go(acc :+ UnbalancedTransfer(hd), tl)
             }
           case Nil => acc
         }

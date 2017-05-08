@@ -27,7 +27,7 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
 
   def viewTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
-    val organised = Organiser.organise(allTransactions, request.queryString)
+    val organised       = Organiser.organise(allTransactions, request.queryString)
     Ok(views.html.transactions(organised))
   }
 
@@ -61,17 +61,25 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
   def editTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
 
-    val ts = allTransactions
+    implicit val transactions = allTransactions
+
+    println("*3")
+    println(request.body.asFormUrlEncoded)
+
     val submitted = request.body.asFormUrlEncoded map {
       _ flatMap {
+        case ("transactions_length", _) => None
         case (hashCode, categoryCodes) =>
-          Transaction.fromHashcode(ts)(hashCode.toInt) map {
+          Transaction.fromHashcode(hashCode.toInt) map {
             _.copy(category = Category.fromCode(categoryCodes.head))
           }
       }
     } getOrElse Nil
 
-    if (submitted.map(_.category) != ts.map(_.category)) {
+    if (Transaction.haveChanged(submitted)) {
+
+      println("*2")
+
       GoogleSheet.replaceAllRows(transactionSheet, submitted.toSeq.map(toRow)) match {
         case Left(msg) => InternalServerError(msg)
         case Right(_) =>
@@ -82,13 +90,13 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
 
   val transactionForm = Form(
     mapping(
-      "account" -> text,
-      "date" -> date,
-      "payee" -> text,
+      "account"   -> text,
+      "date"      -> date,
+      "payee"     -> text,
       "reference" -> optional(text),
-      "mode" -> optional(text),
-      "amount" -> text,
-      "category" -> default(text, Uncategorised.code)
+      "mode"      -> optional(text),
+      "amount"    -> text,
+      "category"  -> default(text, Uncategorised.code)
     )(TransactionBinding.apply)(TransactionBinding.unapply)
   )
 
@@ -99,14 +107,14 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
 
   def addTransaction() = AuthorisedAction(parse.form(transactionForm)) { request =>
     implicit val userId = request.session(UserId.key)
-    val transaction = Transaction.fromBinding(request.body)
+    val transaction     = Transaction.fromBinding(request.body)
     GoogleSheet.appendRows(transactionSheet, Seq(toRow(transaction)))
     Redirect(routes.TransactionController.viewTransactions())
   }
 
   def dedupTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
-    val deduped = allTransactions.distinct
+    val deduped         = allTransactions.distinct
     GoogleSheet.replaceAllRows(transactionSheet, deduped.map(toRow)) match {
       case Left(msg) => InternalServerError(msg)
       case Right(_) =>
