@@ -9,7 +9,6 @@ import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Controller
 import services.GoogleSheet
-import util.Organiser
 
 import scala.io.Source
 
@@ -27,8 +26,7 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
 
   def viewTransactions() = AuthorisedAction { request =>
     implicit val userId = request.session(UserId.key)
-    val organised       = Organiser.organise(allTransactions, request.queryString)
-    Ok(views.html.transactions(organised))
+    Ok(views.html.transactions(allTransactions))
   }
 
   def viewImportTransactions() = AuthorisedAction { request =>
