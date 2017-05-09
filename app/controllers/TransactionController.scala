@@ -59,14 +59,9 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
   }
 
   def editTransactions() = AuthorisedAction { request =>
-    implicit val userId = request.session(UserId.key)
-
-    implicit val transactions = allTransactions
-
-    println("*3")
-    println(request.body.asFormUrlEncoded)
-
-    val submitted = request.body.asFormUrlEncoded map {
+    implicit val userId       = request.session(UserId.key)
+    implicit val transactions = allTransactions.toSet
+    val submitted = (request.body.asFormUrlEncoded map {
       _ flatMap {
         case ("transactions_length", _) => None
         case (hashCode, categoryCodes) =>
@@ -74,16 +69,11 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
             _.copy(category = Category.fromCode(categoryCodes.head))
           }
       }
-    } getOrElse Nil
-
+    } getOrElse Nil).toSet
     if (Transaction.haveChanged(submitted)) {
-
-      println("*2")
-
-      GoogleSheet.replaceAllRows(transactionSheet, submitted.toSeq.map(toRow)) match {
+      GoogleSheet.replaceAllRows(transactionSheet, Transaction.replace(submitted).toSeq.map(toRow)) match {
         case Left(msg) => InternalServerError(msg)
-        case Right(_) =>
-          Redirect(routes.TransactionController.viewTransactions())
+        case Right(_)  => Redirect(routes.TransactionController.viewTransactions())
       }
     } else Redirect(routes.TransactionController.viewTransactions())
   }

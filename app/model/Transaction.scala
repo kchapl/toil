@@ -68,7 +68,7 @@ object Transaction {
       Right(parsed(a, source) -- before)
     } getOrElse Left(Failure(s"No such account: $accountName"))
 
-  def fromHashcode(hashCode: Int)(implicit refs: Seq[Transaction]): Option[Transaction] =
+  def fromHashcode(hashCode: Int)(implicit refs: Set[Transaction]): Option[Transaction] =
     refs.find(_.hashCode == hashCode)
 
   def fromBinding(b: TransactionBinding) = Transaction(
@@ -81,10 +81,13 @@ object Transaction {
     category = Category.fromCode(b.category)
   )
 
-  def haveChanged(submitted: Iterable[Transaction])(implicit refs: Seq[Transaction]): Boolean =
-    submitted.exists { t =>
+  def haveChanged(subset: Set[Transaction])(implicit refs: Set[Transaction]): Boolean =
+    subset.exists { t =>
       refs.find(_ == t) exists (_.category != t.category)
     }
+
+  def replace(replacements: Set[Transaction])(implicit refs: Set[Transaction]): Set[Transaction] =
+    refs.diff(replacements) ++ replacements
 
   def findAnomalies(transactions: Seq[Transaction]): Option[Seq[Anomaly]] = {
 
