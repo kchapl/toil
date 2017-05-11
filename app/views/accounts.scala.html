@@ -1,16 +1,18 @@
-@(accounts: Seq[model.Account])
+@(accounts: Seq[model.AccountAndTransactions])
 
 @frame(title = "Accounts", highlightedNavItem = "Accounts") {
-    <table>
-        <tr>
-            <td>Name</td>
-            <td>Original balance</td>
-        </tr>
-        @for(a <- accounts) {
-            <tr>
-                <td>@a.name</td>
-                <td>@a.originalBalance</td>
-            </tr>
-        }
-    </table>
+  @for((account, i) <- accounts.zipWithIndex) {
+    <div class="panel panel-default">
+      <div class="panel-heading">@account.account.name</div>
+      <div class="panel-body">
+        <canvas id="chart"
+        width="200" height="200"
+        data-labels="[@account.dateBalances.map(_.date).mkString("\"", "\",\"", "\"")]"
+        data-balances="[@account.dateBalances.map(_.amount.pounds).mkString(", ")]">
+        </canvas>
+      </div>
+    </div>
+  }
+
+  <script src="@routes.Assets.at("javascripts/balance-history.js")"></script>
 }
