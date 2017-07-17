@@ -1,5 +1,6 @@
 @import model.Category
-@(form: Form[TransactionBinding], as: Seq[model.Account])(implicit messages: Messages)
+@import helper._
+@(form: Form[TransactionBinding], as: Seq[model.Account])(implicit request: RequestHeader, messages: Messages)
 
 @frame(title = "Add transaction", highlightedNavItem = "Add") {
   @if(form.hasGlobalErrors) {
@@ -10,33 +11,34 @@
   </ul>
   }
   @helper.form(action = routes.TransactionController.addTransaction) {
-    @helper.select(
+    @CSRF.formField
+    @select(
       form("account"),
       options = as.map(a => a.name -> a.name),
       '_label -> "Account"
     )<br />
-    @helper.inputDate(
+    @inputDate(
       form("date"),
       '_label -> "Date",
       '_help -> ""
     )<br />
-    @helper.inputText(
+    @inputText(
       form("payee"),
       '_label -> "Payee"
     )<br />
-    @helper.inputText(
+    @inputText(
       form("reference"),
       '_label -> "Reference"
     )<br />
-    @helper.inputText(
+    @inputText(
       form("mode"),
       '_label -> "Mode"
     )<br />
-    @helper.inputText(
+    @inputText(
       form("amount"),
       '_label -> "Amount"
     )<br />
-    @helper.select(
+    @select(
       form("category"),
       options = Category.all.map(c => c.code -> c.name),
       '_label -> "Category"

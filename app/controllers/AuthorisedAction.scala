@@ -3,16 +3,19 @@ package controllers
 import java.math.BigInteger
 import java.net.URLEncoder
 import java.security.SecureRandom
+import javax.inject.Inject
 
-import util.Config.redirectUri
 import play.api.mvc.Codec.utf_8
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
+import util.Config.redirectUri
 import util.Flow
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object AuthorisedAction extends ActionBuilder[Request] with ActionFilter[Request] {
+class AuthorisedAction @Inject()(val parser: BodyParsers.Default)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[Request, AnyContent]
+  with ActionFilter[Request] {
 
   private def onUnauthorised[A](request: Request[A], userId: String) = {
     def encode(s: String) = URLEncoder.encode(s, utf_8.charset)

@@ -1,8 +1,10 @@
-@(transactions: Seq[model.Transaction])
+@(transactions: Seq[model.Transaction])(implicit request: RequestHeader)
+@import helper._
 @import model.Category
 
 @frame(title = "Transactions", highlightedNavItem = "Transactions") {
 @helper.form(action = routes.TransactionController.editTransactions) {
+@CSRF.formField
 <div class="panel panel-default">
 
   <div class="panel-body">

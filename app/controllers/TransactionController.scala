@@ -6,13 +6,15 @@ import controllers.Helper.{allAccounts, allTransactions, transactionSheet}
 import model.{Category, Transaction, Uncategorised}
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Controller
+import play.api.i18n.I18nSupport
+import play.api.mvc.{AbstractController, ControllerComponents}
 import services.GoogleSheet
 
 import scala.io.Source
 
-class TransactionController @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
+class TransactionController @Inject()(components: ControllerComponents, authorisedAction: AuthorisedAction)
+  extends AbstractController(components)
+  with I18nSupport {
 
   private def toRow(tx: Transaction) = Seq(
     tx.account,
@@ -24,24 +26,24 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
     tx.category.code
   )
 
-  def viewTransactions() = AuthorisedAction { request =>
+  def viewTransactions() = authorisedAction { implicit request =>
     implicit val userId = request.session(UserId.key)
     Ok(views.html.transactions(allTransactions))
   }
 
-  def viewImportTransactions() = AuthorisedAction { request =>
+  def viewImportTransactions() = authorisedAction { implicit request =>
     implicit val userId = request.session(UserId.key)
     Ok(views.html.transactionsImport(allAccounts))
   }
 
-  def importTransactions() = AuthorisedAction(parse.multipartFormData) { request =>
+  def importTransactions() = authorisedAction(parse.multipartFormData) { request =>
     request.body.file("transactions") map { filePart =>
       implicit val userId = request.session(UserId.key)
       Transaction.toImport(
         before = allTransactions.toSet,
         accounts = allAccounts.toSet,
         accountName = request.body.dataParts("account").head,
-        source = Source.fromFile(filePart.ref.file)
+        source = Source.fromFile(filePart.ref.path.toFile)
       ) match {
         case Left(f) => InternalServerError(f.description)
         case Right(ts) =>
@@ -56,11 +58,12 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
     }
   }
 
-  def editTransactions() = AuthorisedAction { request =>
+  def editTransactions() = authorisedAction { request =>
     implicit val userId       = request.session(UserId.key)
     implicit val transactions = allTransactions.toSet
     val submitted = (request.body.asFormUrlEncoded map {
       _ flatMap {
+        case ("csrfToken", _)           => None
         case ("transactions_length", _) => None
         case (hashCode, categoryCodes) =>
           Transaction.fromHashcode(hashCode.toInt) map {
@@ -88,19 +91,19 @@ class TransactionController @Inject()(val messagesApi: MessagesApi) extends Cont
     )(TransactionBinding.apply)(TransactionBinding.unapply)
   )
 
-  def viewAddTransaction = AuthorisedAction { implicit request =>
+  def viewAddTransaction = authorisedAction { implicit request =>
     implicit val userId = request.session(UserId.key)
     Ok(views.html.transactionAdd(transactionForm, allAccounts))
   }
 
-  def addTransaction() = AuthorisedAction(parse.form(transactionForm)) { request =>
+  def addTransaction() = authorisedAction(parse.form(transactionForm)) { implicit request =>
     implicit val userId = request.session(UserId.key)
     val transaction     = Transaction.fromBinding(request.body)
     GoogleSheet.appendRows(transactionSheet, Seq(toRow(transaction)))
     Redirect(routes.TransactionController.viewTransactions())
   }
 
-  def dedupTransactions() = AuthorisedAction { request =>
+  def dedupTransactions() = authorisedAction { request =>
     implicit val userId = request.session(UserId.key)
     val deduped         = allTransactions.distinct
     GoogleSheet.replaceAllRows(transactionSheet, deduped.map(toRow)) match {

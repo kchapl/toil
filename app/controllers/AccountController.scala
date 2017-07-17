@@ -1,12 +1,15 @@
 package controllers
 
+import javax.inject.Inject
+
 import controllers.Helper.{allAccounts, allTransactions}
 import model.AccountAndTransactions
-import play.api.mvc.Controller
+import play.api.mvc.{AbstractController, ControllerComponents}
 
-class AccountController extends Controller {
+class AccountController @Inject()(components: ControllerComponents, authorisedAction: AuthorisedAction)
+  extends AbstractController(components) {
 
-  def viewAccounts = AuthorisedAction { implicit request =>
+  def viewAccounts = authorisedAction { implicit request =>
     implicit val userId = request.session(UserId.key)
     val transactions    = allTransactions
     Ok(

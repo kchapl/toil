@@ -1,7 +1,9 @@
-@(as: Seq[model.Account])
+@(as: Seq[model.Account])(implicit request: RequestHeader)
+@import helper._
 
 @frame(title = "Import transactions", highlightedNavItem = "Import") {
   @helper.form(action = routes.TransactionController.importTransactions, 'enctype -> "multipart/form-data") {
+    @CSRF.formField
     <select name="account" title="Account name">
     @for(a <- as) {
       <option value="@a.name">@a.name</option>

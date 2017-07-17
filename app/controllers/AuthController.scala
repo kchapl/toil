@@ -3,13 +3,13 @@ package controllers
 import java.net.URLDecoder
 import javax.inject.Inject
 
-import util.Config.redirectUri
 import play.api.libs.ws.WSClient
 import play.api.mvc.Codec.utf_8
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{AbstractController, ControllerComponents}
+import util.Config.redirectUri
 import util.Flow
 
-class AuthController @Inject()(ws: WSClient) extends Controller {
+class AuthController @Inject()(components: ControllerComponents, ws: WSClient) extends AbstractController(components) {
 
   def authCallback(code: String, state: String) = Action { implicit request =>
     def decode(s: String) = URLDecoder.decode(s, utf_8.charset)

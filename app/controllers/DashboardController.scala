@@ -1,8 +1,10 @@
 package controllers
 
-import play.api.mvc.{Action, Controller}
+import javax.inject.Inject
 
-class DashboardController extends Controller {
+import play.api.mvc.{AbstractController, ControllerComponents}
+
+class DashboardController @Inject()(components: ControllerComponents) extends AbstractController(components) {
 
   def view = Action {
     Ok(views.html.dashboard())
