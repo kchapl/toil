@@ -2,6 +2,7 @@ package controllers
 
 import java.time.LocalDate
 
+import com.google.api.client.auth.oauth2.Credential
 import model._
 import services.{GoogleSheet, Row, Sheet}
 import util.Util.asOption
@@ -35,4 +36,7 @@ object Helper {
 
   def allTransactions(implicit userId: String) =
     GoogleSheet.allRows(transactionSheet).map(toTransaction)
+
+  def allTransactions2(credential: Credential) =
+    GoogleSheet.allRows2(transactionSheet, credential).map(toTransaction)
 }

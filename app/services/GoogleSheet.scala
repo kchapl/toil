@@ -2,6 +2,7 @@ package services
 
 import java.util.{List => JavaList}
 
+import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -15,8 +16,8 @@ import scala.util.control.NonFatal
 
 object GoogleSheet {
 
-  private val appName = Config.appName
-  private val transport = GoogleNetHttpTransport.newTrustedTransport
+  private val appName     = Config.appName
+  private val transport   = GoogleNetHttpTransport.newTrustedTransport
   private val jsonFactory = JacksonFactory.getDefaultInstance
 
   private val sheetFileId = Config.sheetFileId
@@ -30,7 +31,8 @@ object GoogleSheet {
     new Sheets.Builder(transport, jsonFactory, authFlow)
       .setApplicationName(appName)
       .build()
-      .spreadsheets().values()
+      .spreadsheets()
+      .values()
   }
 
   private def values(implicit userId: String) = GoogleSheet.valuesService(
@@ -39,26 +41,41 @@ object GoogleSheet {
     )
   )
 
+  private def values2(credential: Credential) = GoogleSheet.valuesService(credential)
+
   def allRows(sheet: Sheet)(implicit userId: String): Seq[Row] = {
     try {
       val response = values.get(sheetFileId, sheet.range).execute()
-      val rows = response.getValues
+      val rows     = response.getValues
       rows.asScala.map(_.asScala.map(_.toString))
     } catch {
       case NonFatal(e) =>
-        Logger.error(s"Failed to fetch from sheet ${ sheet.name }", e)
+        Logger.error(s"Failed to fetch from sheet ${sheet.name}", e)
+        Nil
+    }
+  }
+
+  def allRows2(sheet: Sheet, credential: Credential): Seq[Row] = {
+    try {
+      val response = values2(credential).get(sheetFileId, sheet.range).execute()
+      val rows     = response.getValues
+      rows.asScala.map(_.asScala.map(_.toString))
+    } catch {
+      case NonFatal(e) =>
+        Logger.error(s"Failed to fetch from sheet ${sheet.name}", e)
         Nil
     }
   }
 
   def appendRows(sheet: Sheet, rows: Seq[Row])(implicit userId: String): Int = {
     try {
-      val response = values.append(sheetFileId, sheet.range, content(rows))
+      val response = values
+        .append(sheetFileId, sheet.range, content(rows))
         .setValueInputOption("RAW")
         .execute()
         .getUpdates
       val numRowsAppended = for {
-        updates <- Option(response)
+        updates    <- Option(response)
         numUpdates <- Option(updates.getUpdatedRows)
       } yield {
         numUpdates.toInt
@@ -71,20 +88,20 @@ object GoogleSheet {
     }
   }
 
-  def replaceAllRows(sheet: Sheet, replacements: Seq[Row])
-    (implicit userId: String): Either[String, Unit] = {
+  def replaceAllRows(sheet: Sheet, replacements: Seq[Row])(implicit userId: String): Either[String, Unit] = {
     try {
       Right(
         {
           values.clear(sheetFileId, sheet.range, null).execute()
-          values.update(sheetFileId, sheet.range, content(replacements))
+          values
+            .update(sheetFileId, sheet.range, content(replacements))
             .setValueInputOption("RAW")
             .execute()
         }
       )
     } catch {
       case NonFatal(e) =>
-        Left(s"Failed to update transactions sheet: ${ e.getMessage }")
+        Left(s"Failed to update transactions sheet: ${e.getMessage}")
     }
   }
 }

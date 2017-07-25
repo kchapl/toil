@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import controllers.Helper.{allAccounts, allTransactions, transactionSheet}
+import controllers.Helper.{allAccounts, allTransactions, allTransactions2, transactionSheet}
 import model.{Category, Transaction, Uncategorised}
 import play.api.data.Form
 import play.api.data.Forms._
@@ -27,8 +27,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
   )
 
   def viewTransactions() = authorisedAction { implicit request =>
-    implicit val userId = request.session(UserId.key)
-    Ok(views.html.transactions(allTransactions))
+    Ok(views.html.transactions(allTransactions2(request.credential)))
   }
 
   def viewImportTransactions() = authorisedAction { implicit request =>
