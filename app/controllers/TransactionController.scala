@@ -12,7 +12,7 @@ import services.GoogleSheet
 
 import scala.io.Source
 
-class TransactionController @Inject()(components: ControllerComponents, authorisedAction: AuthorisedAction)
+class TransactionController @Inject()(components: ControllerComponents, authorisedAction: AuthorisedAction2)
   extends AbstractController(components)
   with I18nSupport {
 
