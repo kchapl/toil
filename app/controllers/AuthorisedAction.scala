@@ -14,10 +14,18 @@ import util.Flow
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthorisedAction @Inject()(val parser: BodyParsers.Default)(implicit val executionContext: ExecutionContext)
-  extends ActionBuilder[Request, AnyContent]
-  with ActionFilter[Request] {
+  extends ActionBuilder[CredentialRequest, AnyContent]
+  with ActionRefiner[Request, CredentialRequest] {
 
-  private def onUnauthorised[A](request: Request[A], userId: String) = {
+  override protected def refine[A](request: Request[A]): Future[Either[Result, CredentialRequest[A]]] =
+    Future.successful {
+      val userId = UserId(request)
+      Option(Flow.readWrite.loadCredential(userId)) filter (_.getExpiresInSeconds > 0) map { credential =>
+        Right(new CredentialRequest(credential, request))
+      } getOrElse Left(onUnauthorised(request, userId))
+    }
+
+  private def onUnauthorised[A](request: Request[A], userId: String): Result = {
     def encode(s: String) = URLEncoder.encode(s, utf_8.charset)
     val securityToken     = new BigInteger(130, new SecureRandom()).toString(32)
     val state             = encode(s"securityToken=$securityToken&path=${request.path}")
@@ -26,18 +34,6 @@ class AuthorisedAction @Inject()(val parser: BodyParsers.Default)(implicit val e
       .setState(state)
       .setRedirectUri(redirectUri)
       .build()
-    Some(Redirect(uri).addingToSession("state" -> state, UserId.key -> userId)(request))
+    Redirect(uri).addingToSession("state" -> state, UserId.key -> userId)(request)
   }
-
-  override protected def filter[A](request: Request[A]): Future[Option[Result]] =
-    Future.successful {
-      val userId = UserId(request)
-      (for {
-        credential <- Option(Flow.readWrite.loadCredential(userId))
-        if credential.getExpiresInSeconds > 0
-      } yield credential) match {
-        case Some(_) => None
-        case None    => onUnauthorised(request, userId)
-      }
-    }
 }
