@@ -19,6 +19,7 @@ class AuthorisedAction @Inject()(val parser: BodyParsers.Default)(implicit val e
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, CredentialRequest[A]]] =
     Future.successful {
+      // TODO: if userId isn't in session no point in looking up credential
       val userId = UserId(request)
       Option(Flow.readWrite.loadCredential(userId)) filter (_.getExpiresInSeconds > 0) map { credential =>
         Right(new CredentialRequest(credential, request))

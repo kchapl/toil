@@ -39,7 +39,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
     request.body.file("transactions") map { filePart =>
       implicit val userId = request.session(UserId.key)
       Transaction.toImport(
-        before = allTransactions.toSet,
+        before = allTransactions2(request.credential).toSet,
         accounts = allAccounts.toSet,
         accountName = request.body.dataParts("account").head,
         source = Source.fromFile(filePart.ref.path.toFile)
