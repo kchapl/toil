@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import controllers.Helper.{allAccounts, allTransactions, allTransactions2, transactionSheet}
+import controllers.Helper.{allAccounts, allTransactions, transactionSheet}
 import model.{Category, Transaction, Uncategorised}
 import play.api.data.Form
 import play.api.data.Forms._
@@ -27,7 +27,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
   )
 
   def viewTransactions() = authorisedAction { implicit request =>
-    Ok(views.html.transactions(allTransactions2(request.credential)))
+    Ok(views.html.transactions(allTransactions(request.credential)))
   }
 
   def viewImportTransactions() = authorisedAction { implicit request =>
@@ -39,7 +39,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
     request.body.file("transactions") map { filePart =>
       implicit val userId = request.session(UserId.key)
       Transaction.toImport(
-        before = allTransactions2(request.credential).toSet,
+        before = allTransactions(request.credential).toSet,
         accounts = allAccounts.toSet,
         accountName = request.body.dataParts("account").head,
         source = Source.fromFile(filePart.ref.path.toFile)
@@ -59,7 +59,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
 
   def editTransactions() = authorisedAction { request =>
     implicit val userId       = request.session(UserId.key)
-    implicit val transactions = allTransactions.toSet
+    implicit val transactions = allTransactions(request.credential).toSet
     val submitted = (request.body.asFormUrlEncoded map {
       _ flatMap {
         case ("csrfToken", _)           => None
@@ -104,7 +104,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
 
   def dedupTransactions() = authorisedAction { request =>
     implicit val userId = request.session(UserId.key)
-    val deduped         = allTransactions.distinct
+    val deduped         = allTransactions(request.credential).distinct
     GoogleSheet.replaceAllRows(transactionSheet, deduped.map(toRow)) match {
       case Left(msg) => InternalServerError(msg)
       case Right(_) =>

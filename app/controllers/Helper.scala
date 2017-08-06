@@ -19,8 +19,6 @@ object Helper {
     originalBalance = Amount.fromString(r(2))
   )
 
-  private def abs(amountText: String) = amountText.stripPrefix("-")
-
   private def toTransaction(r: Row) = Transaction(
     account = r.head,
     date = LocalDate.parse(r(1)),
@@ -31,12 +29,10 @@ object Helper {
     category = Category.fromCode(r(6))
   )
 
+  // todo: replace
   def allAccounts(implicit userId: String) =
     GoogleSheet.allRows(accountSheet).map(toAccount)
 
-  def allTransactions(implicit userId: String) =
-    GoogleSheet.allRows(transactionSheet).map(toTransaction)
-
-  def allTransactions2(credential: Credential) =
+  def allTransactions(credential: Credential) =
     GoogleSheet.allRows2(transactionSheet, credential).map(toTransaction)
 }

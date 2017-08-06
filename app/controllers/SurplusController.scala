@@ -10,8 +10,7 @@ class SurplusController @Inject()(components: ControllerComponents, authorisedAc
   extends AbstractController(components) {
 
   def viewSurplus = authorisedAction { implicit request =>
-    implicit val userId = request.session(UserId.key)
-    val transactions    = allTransactions
+    val transactions = allTransactions(request.credential)
     Transaction.findAnomalies(transactions) map { anomalies =>
       Ok(views.html.anomalies(anomalies))
     } getOrElse {

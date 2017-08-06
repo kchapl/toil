@@ -11,7 +11,7 @@ class AccountController @Inject()(components: ControllerComponents, authorisedAc
 
   def viewAccounts = authorisedAction { implicit request =>
     implicit val userId = request.session(UserId.key)
-    val transactions    = allTransactions
+    val transactions    = allTransactions(request.credential)
     Ok(
       views.html.accounts(
         allAccounts map { account =>
