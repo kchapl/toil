@@ -5,6 +5,7 @@ import java.net.URLEncoder
 import java.security.SecureRandom
 import javax.inject.Inject
 
+import controllers.UserId.key
 import play.api.mvc.Codec.utf_8
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
@@ -19,11 +20,11 @@ class AuthorisedAction @Inject()(val parser: BodyParsers.Default)(implicit val e
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, CredentialRequest[A]]] =
     Future.successful {
-      // TODO: if userId isn't in session no point in looking up credential
-      val userId = UserId(request)
-      Option(Flow.readWrite.loadCredential(userId)) filter (_.getExpiresInSeconds > 0) map { credential =>
-        Right(new CredentialRequest(credential, request))
-      } getOrElse Left(onUnauthorised(request, userId))
+      request.session.get(key) flatMap { userId =>
+        Option(Flow.readWrite.loadCredential(userId)) filter (_.getExpiresInSeconds > 0) map { credential =>
+          Right(new CredentialRequest(credential, request))
+        }
+      } getOrElse Left(onUnauthorised(request, UserId(request)))
     }
 
   private def onUnauthorised[A](request: Request[A], userId: String): Result = {
