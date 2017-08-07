@@ -57,7 +57,6 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
   }
 
   def editTransactions() = authorisedAction { request =>
-    implicit val userId       = request.session(UserId.key)
     implicit val transactions = allTransactions(request.credential).toSet
     val submitted = (request.body.asFormUrlEncoded map {
       _ flatMap {
@@ -70,7 +69,11 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
       }
     } getOrElse Nil).toSet
     if (Transaction.haveChanged(submitted)) {
-      GoogleSheet.replaceAllRows(transactionSheet, Transaction.replace(submitted).toSeq.map(toRow)) match {
+      GoogleSheet.replaceAllRows(
+        transactionSheet,
+        Transaction.replace(submitted).toSeq.map(toRow),
+        request.credential
+      ) match {
         case Left(msg) => InternalServerError(msg)
         case Right(_)  => Redirect(routes.TransactionController.viewTransactions())
       }
@@ -100,9 +103,12 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
   }
 
   def dedupTransactions() = authorisedAction { request =>
-    implicit val userId = request.session(UserId.key)
-    val deduped         = allTransactions(request.credential).distinct
-    GoogleSheet.replaceAllRows(transactionSheet, deduped.map(toRow)) match {
+    val deduped = allTransactions(request.credential).distinct
+    GoogleSheet.replaceAllRows(
+      transactionSheet,
+      deduped.map(toRow),
+      request.credential
+    ) match {
       case Left(msg) => InternalServerError(msg)
       case Right(_) =>
         Redirect(routes.TransactionController.viewTransactions())
