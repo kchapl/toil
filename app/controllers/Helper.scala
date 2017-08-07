@@ -30,8 +30,8 @@ object Helper {
   )
 
   def allAccounts(credential: Credential) =
-    GoogleSheet.allRows2(accountSheet, credential).map(toAccount)
+    GoogleSheet.allRows(accountSheet, credential).map(toAccount)
 
   def allTransactions(credential: Credential) =
-    GoogleSheet.allRows2(transactionSheet, credential).map(toTransaction)
+    GoogleSheet.allRows(transactionSheet, credential).map(toTransaction)
 }

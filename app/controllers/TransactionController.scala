@@ -36,7 +36,6 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
 
   def importTransactions() = authorisedAction(parse.multipartFormData) { request =>
     request.body.file("transactions") map { filePart =>
-      implicit val userId = request.session(UserId.key)
       Transaction.toImport(
         before = allTransactions(request.credential).toSet,
         accounts = allAccounts(request.credential).toSet,
@@ -47,7 +46,8 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
         case Right(ts) =>
           GoogleSheet.appendRows(
             transactionSheet,
-            rows = ts.map(toRow).toSeq
+            rows = ts.map(toRow).toSeq,
+            request.credential
           )
           Redirect(routes.TransactionController.viewTransactions())
       }
@@ -94,9 +94,8 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
   }
 
   def addTransaction() = authorisedAction(parse.form(transactionForm)) { implicit request =>
-    implicit val userId = request.session(UserId.key)
-    val transaction     = Transaction.fromBinding(request.body)
-    GoogleSheet.appendRows(transactionSheet, Seq(toRow(transaction)))
+    val transaction = Transaction.fromBinding(request.body)
+    GoogleSheet.appendRows(transactionSheet, Seq(toRow(transaction)), request.credential)
     Redirect(routes.TransactionController.viewTransactions())
   }
 

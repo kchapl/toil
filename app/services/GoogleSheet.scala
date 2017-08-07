@@ -43,19 +43,7 @@ object GoogleSheet {
 
   private def values2(credential: Credential) = GoogleSheet.valuesService(credential)
 
-  def allRows(sheet: Sheet)(implicit userId: String): Seq[Row] = {
-    try {
-      val response = values.get(sheetFileId, sheet.range).execute()
-      val rows     = response.getValues
-      rows.asScala.map(_.asScala.map(_.toString))
-    } catch {
-      case NonFatal(e) =>
-        Logger.error(s"Failed to fetch from sheet ${sheet.name}", e)
-        Nil
-    }
-  }
-
-  def allRows2(sheet: Sheet, credential: Credential): Seq[Row] = {
+  def allRows(sheet: Sheet, credential: Credential): Seq[Row] = {
     try {
       val response = values2(credential).get(sheetFileId, sheet.range).execute()
       val rows     = response.getValues
@@ -67,9 +55,9 @@ object GoogleSheet {
     }
   }
 
-  def appendRows(sheet: Sheet, rows: Seq[Row])(implicit userId: String): Int = {
+  def appendRows(sheet: Sheet, rows: Seq[Row], credential: Credential): Int =
     try {
-      val response = values
+      val response = values2(credential)
         .append(sheetFileId, sheet.range, content(rows))
         .setValueInputOption("RAW")
         .execute()
@@ -86,7 +74,6 @@ object GoogleSheet {
         Logger.error("Failed to append to transactions sheet", e)
         0
     }
-  }
 
   def replaceAllRows(sheet: Sheet, replacements: Seq[Row])(implicit userId: String): Either[String, Unit] = {
     try {
