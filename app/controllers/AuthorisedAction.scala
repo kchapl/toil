@@ -3,7 +3,6 @@ package controllers
 import java.math.BigInteger
 import java.net.URLEncoder
 import java.security.SecureRandom
-import javax.inject.Inject
 
 import controllers.UserId.key
 import play.api.mvc.Codec.utf_8
@@ -14,7 +13,7 @@ import util.Flow
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthorisedAction @Inject()(val parser: BodyParsers.Default)(implicit val executionContext: ExecutionContext)
+class AuthorisedAction(val parser: BodyParser[AnyContent])(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[CredentialRequest, AnyContent]
   with ActionRefiner[Request, CredentialRequest] {
 

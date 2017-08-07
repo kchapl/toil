@@ -1,7 +1,5 @@
 package controllers
 
-import javax.inject.Inject
-
 import controllers.Helper.{allAccounts, allTransactions, transactionSheet}
 import model.{Category, Transaction, Uncategorised}
 import play.api.data.Form
@@ -12,7 +10,7 @@ import services.GoogleSheet
 
 import scala.io.Source
 
-class TransactionController @Inject()(components: ControllerComponents, authorisedAction: AuthorisedAction)
+class TransactionController(components: ControllerComponents, authAction: AuthorisedAction)
   extends AbstractController(components)
   with I18nSupport {
 
@@ -26,15 +24,15 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
     tx.category.code
   )
 
-  def viewTransactions() = authorisedAction { implicit request =>
+  def viewTransactions() = authAction { implicit request =>
     Ok(views.html.transactions(allTransactions(request.credential)))
   }
 
-  def viewImportTransactions() = authorisedAction { implicit request =>
+  def viewImportTransactions() = authAction { implicit request =>
     Ok(views.html.transactionsImport(allAccounts(request.credential)))
   }
 
-  def importTransactions() = authorisedAction(parse.multipartFormData) { request =>
+  def importTransactions() = authAction(parse.multipartFormData) { request =>
     request.body.file("transactions") map { filePart =>
       Transaction.toImport(
         before = allTransactions(request.credential).toSet,
@@ -56,7 +54,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
     }
   }
 
-  def editTransactions() = authorisedAction { request =>
+  def editTransactions() = authAction { request =>
     implicit val transactions = allTransactions(request.credential).toSet
     val submitted = (request.body.asFormUrlEncoded map {
       _ flatMap {
@@ -92,17 +90,17 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
     )(TransactionBinding.apply)(TransactionBinding.unapply)
   )
 
-  def viewAddTransaction = authorisedAction { implicit request =>
+  def viewAddTransaction = authAction { implicit request =>
     Ok(views.html.transactionAdd(transactionForm, allAccounts(request.credential)))
   }
 
-  def addTransaction() = authorisedAction(parse.form(transactionForm)) { implicit request =>
+  def addTransaction() = authAction(parse.form(transactionForm)) { implicit request =>
     val transaction = Transaction.fromBinding(request.body)
     GoogleSheet.appendRows(transactionSheet, Seq(toRow(transaction)), request.credential)
     Redirect(routes.TransactionController.viewTransactions())
   }
 
-  def dedupTransactions() = authorisedAction { request =>
+  def dedupTransactions() = authAction { request =>
     val deduped = allTransactions(request.credential).distinct
     GoogleSheet.replaceAllRows(
       transactionSheet,
