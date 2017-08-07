@@ -10,16 +10,16 @@ class AccountController @Inject()(components: ControllerComponents, authorisedAc
   extends AbstractController(components) {
 
   def viewAccounts = authorisedAction { implicit request =>
-    implicit val userId = request.session(UserId.key)
-    val transactions    = allTransactions(request.credential)
+    val transactions = allTransactions(request.credential)
     Ok(
       views.html.accounts(
-        allAccounts map { account =>
+        allAccounts(request.credential) map { account =>
           AccountAndTransactions(
             account,
             transactions.filter(_.account == account.name).toSet
           )
         }
-      ))
+      )
+    )
   }
 }

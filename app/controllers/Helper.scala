@@ -29,9 +29,8 @@ object Helper {
     category = Category.fromCode(r(6))
   )
 
-  // todo: replace
-  def allAccounts(implicit userId: String) =
-    GoogleSheet.allRows(accountSheet).map(toAccount)
+  def allAccounts(credential: Credential) =
+    GoogleSheet.allRows2(accountSheet, credential).map(toAccount)
 
   def allTransactions(credential: Credential) =
     GoogleSheet.allRows2(transactionSheet, credential).map(toTransaction)

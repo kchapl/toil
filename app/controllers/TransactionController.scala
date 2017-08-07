@@ -31,8 +31,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
   }
 
   def viewImportTransactions() = authorisedAction { implicit request =>
-    implicit val userId = request.session(UserId.key)
-    Ok(views.html.transactionsImport(allAccounts))
+    Ok(views.html.transactionsImport(allAccounts(request.credential)))
   }
 
   def importTransactions() = authorisedAction(parse.multipartFormData) { request =>
@@ -40,7 +39,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
       implicit val userId = request.session(UserId.key)
       Transaction.toImport(
         before = allTransactions(request.credential).toSet,
-        accounts = allAccounts.toSet,
+        accounts = allAccounts(request.credential).toSet,
         accountName = request.body.dataParts("account").head,
         source = Source.fromFile(filePart.ref.path.toFile)
       ) match {
@@ -91,8 +90,7 @@ class TransactionController @Inject()(components: ControllerComponents, authoris
   )
 
   def viewAddTransaction = authorisedAction { implicit request =>
-    implicit val userId = request.session(UserId.key)
-    Ok(views.html.transactionAdd(transactionForm, allAccounts))
+    Ok(views.html.transactionAdd(transactionForm, allAccounts(request.credential)))
   }
 
   def addTransaction() = authorisedAction(parse.form(transactionForm)) { implicit request =>
