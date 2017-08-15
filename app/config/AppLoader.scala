@@ -36,7 +36,8 @@ class Components(ctx: Context)
       new AuthController(controllerComponents, wsClient),
       new AccountController(controllerComponents, authAction),
       new TransactionController(controllerComponents, authAction),
-      new SurplusController(controllerComponents, authAction)
+      new SurplusController(controllerComponents, authAction),
+      new AdminController(controllerComponents, authAction)
     )
   }
 }

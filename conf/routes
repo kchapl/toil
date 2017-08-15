@@ -16,3 +16,5 @@ POST        /transactions/add           controllers.TransactionController.addTra
 GET         /surplus                    controllers.SurplusController.viewSurplus()
 
 GET         /fix/dedup                  controllers.TransactionController.dedupTransactions()
+
+GET /admin/resources controllers.AdminController.viewResources()
