@@ -1,11 +1,12 @@
 package controllers
 
 import play.api.mvc.{AbstractController, ControllerComponents}
+import services.ResourceService
 
-class AdminController(components: ControllerComponents, authAction: AuthorisedAction)
+class AdminController(components: ControllerComponents, authAction: AuthorisedAction, resourceService: ResourceService)
   extends AbstractController(components) {
 
   def viewResources() = authAction { implicit request =>
-    Ok("Will show resources")
+    Ok(views.html.resources(resourceService.fetchUsage(request.credential)))
   }
 }

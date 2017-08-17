@@ -3,13 +3,15 @@ package config
 import controllers._
 import play.api.ApplicationLoader.Context
 import play.api.libs.ws.ahc.AhcWSComponents
+import play.api.mvc.EssentialFilter
 import play.api.routing.Router
-import play.api.{ApplicationLoader, BuiltInComponentsFromContext, LoggerConfigurator}
+import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext, LoggerConfigurator}
 import play.filters.HttpFiltersComponents
 import router.Routes
+import services.GoogleSheet2
 
 class AppLoader extends ApplicationLoader {
-  def load(ctx: Context) = {
+  override def load(ctx: Context): Application = {
     LoggerConfigurator(ctx.environment.classLoader) foreach {
       _.configure(ctx.environment, ctx.initialConfiguration, Map.empty)
     }
@@ -24,11 +26,14 @@ class Components(ctx: Context)
   with AhcWSComponents {
 
   // todo reinstate
-  override def httpFilters =
+  override def httpFilters: Seq[EssentialFilter] =
     super.httpFilters.filterNot(filter => filter == securityHeadersFilter || filter == allowedHostsFilter)
 
   lazy val router: Router = {
     val authAction = new AuthorisedAction(defaultBodyParser)
+
+    val googleSheetService = new GoogleSheet2()
+
     new Routes(
       httpErrorHandler,
       assets,
@@ -37,7 +42,7 @@ class Components(ctx: Context)
       new AccountController(controllerComponents, authAction),
       new TransactionController(controllerComponents, authAction),
       new SurplusController(controllerComponents, authAction),
-      new AdminController(controllerComponents, authAction)
+      new AdminController(controllerComponents, authAction, googleSheetService)
     )
   }
 }

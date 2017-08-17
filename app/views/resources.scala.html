@@ -1,0 +1,10 @@
+@(usage: model.resource.Usage)
+
+@frame(title = "Resources", highlightedNavItem = "Resources") {
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div>Limit: @usage.limit</div>
+      <div>Used: @usage.used (@{usage.used.toDouble/usage.limit*100}%)</div>
+    </div>
+  </div>
+}
