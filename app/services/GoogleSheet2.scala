@@ -13,7 +13,7 @@ import play.api.Logger
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
-class GoogleSheet2(appName: String, sheetFileId: String) extends ResourceService {
+class GoogleSheet2(appName: String, sheetFileId: String) extends ValueService with ResourceService {
 
   private val transport   = GoogleNetHttpTransport.newTrustedTransport
   private val jsonFactory = JacksonFactory.getDefaultInstance
