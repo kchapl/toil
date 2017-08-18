@@ -9,18 +9,14 @@ import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.model.ValueRange
 import model.resource.Usage
 import play.api.Logger
-import util.Config
 
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
-class GoogleSheet2 extends ResourceService {
+class GoogleSheet2(appName: String, sheetFileId: String) extends ResourceService {
 
-  private val appName     = Config.appName
   private val transport   = GoogleNetHttpTransport.newTrustedTransport
   private val jsonFactory = JacksonFactory.getDefaultInstance
-
-  private val sheetFileId = Config.sheetFileId
 
   private def content(rows: Seq[Row]): ValueRange = {
     val values: JavaList[JavaList[AnyRef]] = rows.map(_.map(_.asInstanceOf[AnyRef]).asJava).asJava

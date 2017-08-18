@@ -32,7 +32,10 @@ class Components(ctx: Context)
   lazy val router: Router = {
     val authAction = new AuthorisedAction(defaultBodyParser)
 
-    val googleSheetService = new GoogleSheet2()
+    val googleSheetService = new GoogleSheet2(
+      appName = configuration.get[String]("app.name"),
+      sheetFileId = configuration.get[String]("sheet.file.id")
+    )
 
     new Routes(
       httpErrorHandler,
