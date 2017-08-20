@@ -1,18 +1,23 @@
 package controllers
 
-import controllers.Helper.{allAccounts, allTransactions, transactionSheet}
-import model.{Category, Transaction, Uncategorised}
+import controllers.Helper.{toAccount, toTransaction}
+import model.{Account, Category, Transaction, Uncategorised}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.I18nSupport
 import play.api.libs.Files
-import play.api.mvc.{AbstractController, Action, ControllerComponents, MultipartFormData}
-import services.ValueService
+import play.api.mvc._
+import services.{Row, Sheet, ValueService}
 
 import scala.io.Source
 
-class TransactionController(components: ControllerComponents, authAction: AuthorisedAction, valueService: ValueService)
-  extends AbstractController(components)
+class TransactionController(
+  components: ControllerComponents,
+  authAction: AuthorisedAction,
+  values: ValueService,
+  accountSheet: Sheet,
+  transactionSheet: Sheet
+) extends AbstractController(components)
   with I18nSupport {
 
   private def toRow(tx: Transaction) = Seq(
@@ -25,26 +30,35 @@ class TransactionController(components: ControllerComponents, authAction: Author
     tx.category.code
   )
 
+  private def fetch[A, B](sheet: Sheet, request: CredentialRequest[B], f: Row => A): Seq[A] =
+    values.allRows(sheet, request.credential).map(f)
+
+  private def fetchAllAccounts[A](request: CredentialRequest[A]): Seq[Account] =
+    fetch(accountSheet, request, toAccount)
+
+  private def fetchAllTransactions[A](request: CredentialRequest[A]): Seq[Transaction] =
+    fetch(transactionSheet, request, toTransaction)
+
   def viewTransactions() = authAction { implicit request =>
-    Ok(views.html.transactions(allTransactions(request.credential)))
+    Ok(views.html.transactions(fetchAllTransactions(request)))
   }
 
   def viewImportTransactions() = authAction { implicit request =>
-    Ok(views.html.transactionsImport(allAccounts(request.credential)))
+    Ok(views.html.transactionsImport(fetchAllAccounts(request)))
   }
 
   def importTransactions(): Action[MultipartFormData[Files.TemporaryFile]] = authAction(parse.multipartFormData) {
     request =>
       request.body.file("transactions") map { filePart =>
         Transaction.toImport(
-          before = allTransactions(request.credential).toSet,
-          accounts = allAccounts(request.credential).toSet,
+          before = fetchAllTransactions(request).toSet,
+          accounts = fetchAllAccounts(request).toSet,
           accountName = request.body.dataParts("account").head,
           source = Source.fromFile(filePart.ref.path.toFile)
         ) match {
           case Left(f) => InternalServerError(f.description)
           case Right(ts) =>
-            valueService.appendRows(
+            values.appendRows(
               transactionSheet,
               rows = ts.map(toRow).toSeq,
               request.credential
@@ -57,7 +71,7 @@ class TransactionController(components: ControllerComponents, authAction: Author
   }
 
   def editTransactions() = authAction { request =>
-    implicit val transactions: Set[Transaction] = allTransactions(request.credential).toSet
+    implicit val transactions: Set[Transaction] = fetchAllTransactions(request).toSet
     val submitted = (request.body.asFormUrlEncoded map {
       _ flatMap {
         case ("csrfToken", _)           => None
@@ -69,7 +83,7 @@ class TransactionController(components: ControllerComponents, authAction: Author
       }
     } getOrElse Nil).toSet
     if (Transaction.haveChanged(submitted)) {
-      valueService.replaceAllRows(
+      values.replaceAllRows(
         transactionSheet,
         Transaction.replace(submitted).toSeq.map(toRow),
         request.credential
@@ -93,18 +107,18 @@ class TransactionController(components: ControllerComponents, authAction: Author
   )
 
   def viewAddTransaction = authAction { implicit request =>
-    Ok(views.html.transactionAdd(transactionForm, allAccounts(request.credential)))
+    Ok(views.html.transactionAdd(transactionForm, fetchAllAccounts(request)))
   }
 
   def addTransaction(): Action[TransactionBinding] = authAction(parse.form(transactionForm)) { implicit request =>
     val transaction = Transaction.fromBinding(request.body)
-    valueService.appendRows(transactionSheet, Seq(toRow(transaction)), request.credential)
+    values.appendRows(transactionSheet, Seq(toRow(transaction)), request.credential)
     Redirect(routes.TransactionController.viewTransactions())
   }
 
   def dedupTransactions() = authAction { request =>
-    val deduped = allTransactions(request.credential).distinct
-    valueService.replaceAllRows(
+    val deduped = fetchAllTransactions(request).distinct
+    values.replaceAllRows(
       transactionSheet,
       deduped.map(toRow),
       request.credential
