@@ -47,7 +47,7 @@ class Components(ctx: Context)
       new AuthController(controllerComponents, wsClient),
       new AccountController(controllerComponents, authAction, googleSheetService),
       new TransactionController(controllerComponents, authAction, googleSheetService, accountSheet, transactionSheet),
-      new SurplusController(controllerComponents, authAction),
+      new SurplusController(controllerComponents, authAction, googleSheetService, transactionSheet),
       new AdminController(controllerComponents, authAction, googleSheetService)
     )
   }
