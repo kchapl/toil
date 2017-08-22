@@ -1,6 +1,5 @@
 package controllers
 
-import controllers.Helper.{toAccount, toTransaction}
 import model.{Account, Category, Transaction, Uncategorised}
 import play.api.data.Form
 import play.api.data.Forms._
@@ -34,10 +33,10 @@ class TransactionController(
     values.allRows(sheet, request.credential).map(f)
 
   private def fetchAllAccounts[A](request: CredentialRequest[A]): Seq[Account] =
-    fetch(accountSheet, request, toAccount)
+    fetch(accountSheet, request, Account.fromRow)
 
   private def fetchAllTransactions[A](request: CredentialRequest[A]): Seq[Transaction] =
-    fetch(transactionSheet, request, toTransaction)
+    fetch(transactionSheet, request, Transaction.fromRow)
 
   def viewTransactions() = authAction { implicit request =>
     Ok(views.html.transactions(fetchAllTransactions(request)))

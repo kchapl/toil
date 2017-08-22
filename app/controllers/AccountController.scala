@@ -1,20 +1,22 @@
 package controllers
 
-import controllers.Helper.{toAccount, toTransaction, transactionSheet}
-import model.AccountAndTransactions
+import model.{Account, AccountAndTransactions, Transaction}
 import play.api.mvc.{AbstractController, ControllerComponents}
 import services.{Sheet, ValueService}
 
-class AccountController(components: ControllerComponents, authAction: AuthorisedAction, values: ValueService)
-  extends AbstractController(components) {
-
-  private val accountSheet = Sheet("Accounts", numCols = 3)
+class AccountController(
+  components: ControllerComponents,
+  authAction: AuthorisedAction,
+  values: ValueService,
+  accountSheet: Sheet,
+  transactionSheet: Sheet
+) extends AbstractController(components) {
 
   def viewAccounts = authAction { implicit request =>
-    val transactions = values.allRows(transactionSheet, request.credential).map(toTransaction)
+    val transactions = values.allRows(transactionSheet, request.credential).map(Transaction.fromRow)
     Ok(
       views.html.accounts(
-        values.allRows(accountSheet, request.credential).map(toAccount) map { account =>
+        values.allRows(accountSheet, request.credential).map(Account.fromRow) map { account =>
           AccountAndTransactions(
             account,
             transactions.filter(_.account == account.name).toSet

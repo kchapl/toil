@@ -4,6 +4,7 @@ import java.time.{LocalDate, ZoneId}
 
 import controllers.TransactionBinding
 import model.Account.byName
+import services.Row
 import util.Failure
 import util.Util.asOption
 
@@ -20,7 +21,7 @@ case class Transaction(
   category: Category
 ) {
 
-  override def equals(obj: Any) = obj match {
+  override def equals(obj: Any): Boolean = obj match {
     case other: Transaction =>
       other.account == account &&
         other.date == date &&
@@ -31,7 +32,7 @@ case class Transaction(
     case _ => false
   }
 
-  override def hashCode() =
+  override def hashCode(): Int =
     account.hashCode +
       date.hashCode +
       payee.hashCode +
@@ -79,6 +80,16 @@ object Transaction {
     mode = b.mode,
     amount = Amount.fromString(b.amount),
     category = Category.fromCode(b.category)
+  )
+
+  def fromRow(r: Row) = Transaction(
+    account = r.head,
+    date = LocalDate.parse(r(1)),
+    payee = r(2),
+    reference = asOption(r(3)),
+    mode = asOption(r(4)),
+    amount = Amount.fromString(r(5)),
+    category = Category.fromCode(r(6))
   )
 
   def haveChanged(subset: Set[Transaction])(implicit refs: Set[Transaction]): Boolean =

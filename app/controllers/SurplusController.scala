@@ -1,6 +1,5 @@
 package controllers
 
-import controllers.Helper.toTransaction
 import model.{Surpluses, Transaction}
 import play.api.mvc.{AbstractController, ControllerComponents}
 import services.{Sheet, ValueService}
@@ -13,7 +12,7 @@ class SurplusController(
 ) extends AbstractController(components) {
 
   private def fetchAllTransactions[A](request: CredentialRequest[A]): Seq[Transaction] =
-    values.allRows(transactionSheet, request.credential).map(toTransaction)
+    values.allRows(transactionSheet, request.credential).map(Transaction.fromRow)
 
   def viewSurplus = authAction { implicit request =>
     val transactions = fetchAllTransactions(request)

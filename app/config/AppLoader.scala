@@ -8,7 +8,7 @@ import play.api.routing.Router
 import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext, LoggerConfigurator}
 import play.filters.HttpFiltersComponents
 import router.Routes
-import services.{GoogleSheet2, Sheet}
+import services.{GoogleSheetService, Sheet}
 
 class AppLoader extends ApplicationLoader {
   override def load(ctx: Context): Application = {
@@ -32,7 +32,7 @@ class Components(ctx: Context)
   lazy val router: Router = {
     val authAction = new AuthorisedAction(defaultBodyParser)
 
-    val googleSheetService = new GoogleSheet2(
+    val googleSheets = new GoogleSheetService(
       appName = configuration.get[String]("app.name"),
       sheetFileId = configuration.get[String]("sheet.file.id")
     )
@@ -45,10 +45,10 @@ class Components(ctx: Context)
       assets,
       new DashboardController(controllerComponents),
       new AuthController(controllerComponents, wsClient),
-      new AccountController(controllerComponents, authAction, googleSheetService),
-      new TransactionController(controllerComponents, authAction, googleSheetService, accountSheet, transactionSheet),
-      new SurplusController(controllerComponents, authAction, googleSheetService, transactionSheet),
-      new AdminController(controllerComponents, authAction, googleSheetService)
+      new AccountController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),
+      new TransactionController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),
+      new SurplusController(controllerComponents, authAction, googleSheets, transactionSheet),
+      new AdminController(controllerComponents, authAction, googleSheets)
     )
   }
 }
