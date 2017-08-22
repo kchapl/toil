@@ -1,5 +1,8 @@
 package config
 
+import java.io.File
+import java.net.URLEncoder
+
 import controllers._
 import play.api.ApplicationLoader.Context
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -9,6 +12,9 @@ import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext, L
 import play.filters.HttpFiltersComponents
 import router.Routes
 import services.{GoogleSheetService, Sheet}
+import util.Flow
+
+import scala.util.Properties
 
 class AppLoader extends ApplicationLoader {
   override def load(ctx: Context): Application = {
@@ -30,11 +36,22 @@ class Components(ctx: Context)
     super.httpFilters.filterNot(filter => filter == securityHeadersFilter || filter == allowedHostsFilter)
 
   lazy val router: Router = {
-    val authAction = new AuthorisedAction(defaultBodyParser)
+
+    def urlEncode(s: String) = URLEncoder.encode(s, "UTF-8")
+
+    val flow = new Flow(
+      clientId = urlEncode(configuration.get[String]("app.client.id")),
+      clientSecret = urlEncode(configuration.get[String]("app.client.secret")),
+      fileStore = new File(Properties.tmpDir)
+    )
+
+    val redirectUri = configuration.get[String]("redirect.uri")
+
+    val authAction = new AuthorisedAction(defaultBodyParser, flow, redirectUri)
 
     val googleSheets = new GoogleSheetService(
       appName = configuration.get[String]("app.name"),
-      sheetFileId = configuration.get[String]("sheet.file.id")
+      sheetFileId = configuration.get[String]("app.sheet.file.id")
     )
 
     val accountSheet     = Sheet("Accounts", numCols = 3)
@@ -44,7 +61,7 @@ class Components(ctx: Context)
       httpErrorHandler,
       assets,
       new DashboardController(controllerComponents),
-      new AuthController(controllerComponents, wsClient),
+      new AuthController(controllerComponents, wsClient, flow, redirectUri),
       new AccountController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),
       new TransactionController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),
       new SurplusController(controllerComponents, authAction, googleSheets, transactionSheet),

@@ -8,19 +8,23 @@ import controllers.UserId.key
 import play.api.mvc.Codec.utf_8
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
-import util.Config.redirectUri
 import util.Flow
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthorisedAction(val parser: BodyParser[AnyContent])(implicit val executionContext: ExecutionContext)
-  extends ActionBuilder[CredentialRequest, AnyContent]
+class AuthorisedAction(
+  val parser: BodyParser[AnyContent],
+  flow: Flow,
+  redirectUri: String
+)(
+  implicit val executionContext: ExecutionContext
+) extends ActionBuilder[CredentialRequest, AnyContent]
   with ActionRefiner[Request, CredentialRequest] {
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, CredentialRequest[A]]] =
     Future.successful {
       request.session.get(key) flatMap { userId =>
-        Option(Flow.readWrite.loadCredential(userId)) filter (_.getExpiresInSeconds > 0) map { credential =>
+        Option(flow.readWrite.loadCredential(userId)) filter (_.getExpiresInSeconds > 0) map { credential =>
           Right(new CredentialRequest(credential, request))
         }
       } getOrElse Left(onUnauthorised(request, UserId(request)))
@@ -30,7 +34,7 @@ class AuthorisedAction(val parser: BodyParser[AnyContent])(implicit val executio
     def encode(s: String) = URLEncoder.encode(s, utf_8.charset)
     val securityToken     = new BigInteger(130, new SecureRandom()).toString(32)
     val state             = encode(s"securityToken=$securityToken&path=${request.path}")
-    val uri = Flow.readWrite
+    val uri = flow.readWrite
       .newAuthorizationUrl()
       .setState(state)
       .setRedirectUri(redirectUri)
