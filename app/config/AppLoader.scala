@@ -33,7 +33,7 @@ class Components(ctx: Context)
 
   // todo reinstate
   override def httpFilters: Seq[EssentialFilter] =
-    super.httpFilters.filterNot(filter => filter == securityHeadersFilter || filter == allowedHostsFilter)
+    super.httpFilters.filterNot(_ == securityHeadersFilter)
 
   lazy val router: Router = {
 
@@ -45,7 +45,7 @@ class Components(ctx: Context)
       fileStore = new File(Properties.tmpDir)
     )
 
-    val redirectUri = configuration.get[String]("redirect.uri")
+    val redirectUri = configuration.get[String]("app.redirect.uri")
 
     val authAction = new AuthorisedAction(defaultBodyParser, flow, redirectUri)
 
