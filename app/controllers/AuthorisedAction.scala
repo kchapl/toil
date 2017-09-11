@@ -18,14 +18,14 @@ class AuthorisedAction(
   redirectUri: String
 )(
   implicit val executionContext: ExecutionContext
-) extends ActionBuilder[CredentialRequest, AnyContent]
-  with ActionRefiner[Request, CredentialRequest] {
+) extends ActionBuilder[Request, AnyContent]
+  with ActionRefiner[Request, Request] {
 
-  override protected def refine[A](request: Request[A]): Future[Either[Result, CredentialRequest[A]]] =
+  override protected def refine[A](request: Request[A]): Future[Either[Result, Request[A]]] =
     Future.successful {
       request.session.get(key) flatMap { userId =>
         Option(flow.readWrite.loadCredential(userId)) filter (_.getExpiresInSeconds > 0) map { credential =>
-          Right(new CredentialRequest(credential, request))
+          Right(request.addAttr(Attributes.credential, credential))
         }
       } getOrElse Left(onUnauthorised(request, UserId(request)))
     }

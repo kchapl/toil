@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.Attributes.credential
 import model.{Account, AccountAndTransactions, Transaction}
 import play.api.mvc.{AbstractController, ControllerComponents}
 import services.{Sheet, ValueService}
@@ -13,10 +14,10 @@ class AccountController(
 ) extends AbstractController(components) {
 
   def viewAccounts = authAction { implicit request =>
-    val transactions = values.allRows(transactionSheet, request.credential).map(Transaction.fromRow)
+    val transactions = values.allRows(transactionSheet, request.attrs(credential)).map(Transaction.fromRow)
     Ok(
       views.html.accounts(
-        values.allRows(accountSheet, request.credential).map(Account.fromRow) map { account =>
+        values.allRows(accountSheet, request.attrs(credential)).map(Account.fromRow) map { account =>
           AccountAndTransactions(
             account,
             transactions.filter(_.account == account.name).toSet

@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.Attributes.credential
 import model.{Account, Category, Transaction, Uncategorised}
 import play.api.data.Form
 import play.api.data.Forms._
@@ -29,13 +30,13 @@ class TransactionController(
     tx.category.code
   )
 
-  private def fetch[A, B](sheet: Sheet, request: CredentialRequest[B], f: Row => A): Seq[A] =
-    values.allRows(sheet, request.credential).map(f)
+  private def fetch[A, B](sheet: Sheet, request: Request[B], f: Row => A): Seq[A] =
+    values.allRows(sheet, request.attrs(credential)).map(f)
 
-  private def fetchAllAccounts[A](request: CredentialRequest[A]): Seq[Account] =
+  private def fetchAllAccounts[A](request: Request[A]): Seq[Account] =
     fetch(accountSheet, request, Account.fromRow)
 
-  private def fetchAllTransactions[A](request: CredentialRequest[A]): Seq[Transaction] =
+  private def fetchAllTransactions[A](request: Request[A]): Seq[Transaction] =
     fetch(transactionSheet, request, Transaction.fromRow)
 
   def viewTransactions() = authAction { implicit request =>
@@ -60,7 +61,7 @@ class TransactionController(
             values.appendRows(
               transactionSheet,
               rows = ts.map(toRow).toSeq,
-              request.credential
+              request.attrs(credential)
             )
             Redirect(routes.TransactionController.viewTransactions())
         }
@@ -85,7 +86,7 @@ class TransactionController(
       values.replaceAllRows(
         transactionSheet,
         Transaction.replace(submitted).toSeq.map(toRow),
-        request.credential
+        request.attrs(credential)
       ) match {
         case Left(msg) => InternalServerError(msg)
         case Right(_)  => Redirect(routes.TransactionController.viewTransactions())
@@ -111,7 +112,7 @@ class TransactionController(
 
   def addTransaction(): Action[TransactionBinding] = authAction(parse.form(transactionForm)) { implicit request =>
     val transaction = Transaction.fromBinding(request.body)
-    values.appendRows(transactionSheet, Seq(toRow(transaction)), request.credential)
+    values.appendRows(transactionSheet, Seq(toRow(transaction)), request.attrs(credential))
     Redirect(routes.TransactionController.viewTransactions())
   }
 
@@ -120,7 +121,7 @@ class TransactionController(
     values.replaceAllRows(
       transactionSheet,
       deduped.map(toRow),
-      request.credential
+      request.attrs(credential)
     ) match {
       case Left(msg) => InternalServerError(msg)
       case Right(_) =>
