@@ -8,7 +8,7 @@ scalaVersion := "2.12.3"
 
 libraryDependencies ++= Seq(
   ws,
-  "com.google.apis" % "google-api-services-sheets" % "v4-rev478-1.22.0",
+  "com.google.apis" % "google-api-services-sheets" % "v4-rev483-1.22.0",
   "org.webjars"     % "jquery"                     % "3.2.1",
   "org.webjars"     % "bootstrap"                  % "3.3.7-1",
   "org.webjars"     % "datatables"                 % "1.10.15",
