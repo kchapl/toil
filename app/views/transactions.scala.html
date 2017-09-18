@@ -1,11 +1,8 @@
-
 @(transactions: Seq[model.Transaction])(implicit request: RequestHeader)
-@import helper._
+@import views.html.helper.CSRF
 @import model.Category
 
 @frame(title = "Transactions", highlightedNavItem = "Transactions") {
-@helper.form(action = routes.TransactionController.editTransactions) {
-@CSRF.formField
 <div class="panel panel-default">
 
   <div class="panel-body">
@@ -36,7 +33,7 @@
             <td>@tx.mode</td>
             <td>@tx.amount.formatted</td>
             <td>
-              <select name="@tx.hashCode" class="form-control">
+              <select id="@tx.hashCode" data-csrf="@CSRF.getToken.value" class="form-control">
               @for(c <- Category.all) {
                 <option value="@c.code" @if(c == tx.category){selected="selected"}>@c.name</option>
               }
@@ -48,12 +45,8 @@
       </table>
     </div>
   </div>
-  <div class="panel-footer clearfix">
-    <button type="submit" class="btn btn-primary align-right">Update</button>
-  </div>
 
 </div>
-}
 
 <script src="@routes.Assets.at("javascripts/transactions.js")"></script>
 }
