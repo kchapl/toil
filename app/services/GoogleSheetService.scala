@@ -6,11 +6,12 @@ import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.Sheets
-import com.google.api.services.sheets.v4.model.ValueRange
+import com.google.api.services.sheets.v4.model.{UpdateValuesResponse, ValueRange}
 import model.resource.Usage
 import play.api.Logger
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 import scala.util.control.NonFatal
 
 class GoogleSheetService(appName: String, sheetFileId: String) extends ValueService with ResourceService {
@@ -75,6 +76,24 @@ class GoogleSheetService(appName: String, sheetFileId: String) extends ValueServ
         Left(s"Failed to update transactions sheet: ${e.getMessage}")
     }
   }
+
+  def updateCellValue(
+    sheetName: String,
+    rowIdx: Int,
+    colIdx: Int,
+    updateTo: String,
+    credential: Credential
+  ): Try[UpdateValuesResponse] =
+    Try(
+      valuesService(credential)
+        .update(
+          sheetFileId,
+          RangeFinder.cell(sheetName, rowIdx, colIdx),
+          new ValueRange().setValues(Seq(Seq(updateTo.asInstanceOf[AnyRef]).asJava).asJava)
+        )
+        .setValueInputOption("RAW")
+        .execute()
+    )
 
   override def fetchUsage(credential: Credential): Usage = {
     val used = sheetsService(credential).get(sheetFileId).execute().getSheets.asScala.foldRight(0) { (sheet, acc) =>

@@ -50,6 +50,8 @@ case class Transaction(
 
 object Transaction {
 
+  val categoryColumnIndex = 6
+
   def parsed(account: Account, source: Source): Set[Transaction] = {
     def parse(line: String) = account.accType match {
       case Current => TransactionParser.parseCurrentLine(account.name)(line)
@@ -69,8 +71,11 @@ object Transaction {
       Right(parsed(a, source) -- before)
     } getOrElse Left(Failure(s"No such account: $accountName"))
 
-  def fromHashcode(hashCode: Int)(implicit refs: Set[Transaction]): Option[Transaction] =
-    refs.find(_.hashCode == hashCode)
+  def indexFromHashcode(hashCode: Int)(implicit refs: Seq[Transaction]): Option[Int] =
+    refs.indexWhere(_.hashCode == hashCode) match {
+      case -1  => None
+      case idx => Some(idx)
+    }
 
   def fromBinding(b: TransactionBinding) = Transaction(
     account = b.account,

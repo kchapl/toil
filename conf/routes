@@ -7,11 +7,11 @@ GET         /oauth2callback             controllers.AuthController.authCallback(
 GET         /accounts                   controllers.AccountController.viewAccounts()
 
 GET         /transactions               controllers.TransactionController.viewTransactions()
-POST        /transactions/edit          controllers.TransactionController.editTransactions()
 GET         /transactions/import        controllers.TransactionController.viewImportTransactions()
 POST        /transactions/import        controllers.TransactionController.importTransactions()
 GET         /transactions/add           controllers.TransactionController.viewAddTransaction()
 POST        /transactions/add           controllers.TransactionController.addTransaction()
+POST        /transaction/update         controllers.TransactionController.updateTransaction()
 
 GET         /surplus                    controllers.SurplusController.viewSurplus()
 

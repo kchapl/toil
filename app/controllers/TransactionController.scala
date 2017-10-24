@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.Attributes.credential
-import model.{Account, Category, Transaction, Uncategorised}
+import model.{Account, Transaction, Uncategorised}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.I18nSupport
@@ -10,6 +10,7 @@ import play.api.mvc._
 import services.{Row, Sheet, ValueService}
 
 import scala.io.Source
+import scala.util.{Failure, Success}
 
 class TransactionController(
   components: ControllerComponents,
@@ -70,30 +71,6 @@ class TransactionController(
       }
   }
 
-  def editTransactions() = authAction { request =>
-    implicit val transactions: Set[Transaction] = fetchAllTransactions(request).toSet
-    val submitted = (request.body.asFormUrlEncoded map {
-      _ flatMap {
-        case ("csrfToken", _)           => None
-        case ("transactions_length", _) => None
-        case (hashCode, categoryCodes) =>
-          Transaction.fromHashcode(hashCode.toInt) map {
-            _.copy(category = Category.fromCode(categoryCodes.head))
-          }
-      }
-    } getOrElse Nil).toSet
-    if (Transaction.haveChanged(submitted)) {
-      values.replaceAllRows(
-        transactionSheet,
-        Transaction.replace(submitted).toSeq.map(toRow),
-        request.attrs(credential)
-      ) match {
-        case Left(msg) => InternalServerError(msg)
-        case Right(_)  => Redirect(routes.TransactionController.viewTransactions())
-      }
-    } else Redirect(routes.TransactionController.viewTransactions())
-  }
-
   val transactionForm = Form(
     mapping(
       "account"   -> text,
@@ -114,6 +91,27 @@ class TransactionController(
     val transaction = Transaction.fromBinding(request.body)
     values.appendRows(transactionSheet, Seq(toRow(transaction)), request.attrs(credential))
     Redirect(routes.TransactionController.viewTransactions())
+  }
+
+  def updateTransaction(): Action[AnyContent] = authAction { request =>
+    val result = for {
+      hashcode <- request.body.asFormUrlEncoded.get("id").headOption.map(_.toInt)
+      category <- request.body.asFormUrlEncoded.get("cat").headOption
+      rowIndex <- Transaction.indexFromHashcode(hashcode)(fetchAllTransactions(request))
+    } yield {
+      val update = values.updateCellValue(
+        sheetName = transactionSheet.name,
+        rowIdx = rowIndex,
+        colIdx = Transaction.categoryColumnIndex,
+        updateTo = category,
+        credential = request.attrs(credential)
+      )
+      update match {
+        case Failure(e) => InternalServerError(e.getMessage)
+        case Success(_) => NoContent
+      }
+    }
+    result getOrElse BadRequest("Missing or invalid ID field")
   }
 
   def dedupTransactions() = authAction { request =>
