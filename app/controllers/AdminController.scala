@@ -8,6 +8,10 @@ class AdminController(components: ControllerComponents, authAction: AuthorisedAc
   extends AbstractController(components) {
 
   def viewResources() = authAction { implicit request =>
+    println(request.secure)
+    println(request.headers)
+    println(request.host)
+
     Ok(views.html.resources(resourceService.fetchUsage(request.attrs(credential))))
   }
 }

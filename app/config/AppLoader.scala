@@ -35,7 +35,7 @@ class Components(ctx: Context)
 
   // todo reinstate
   override def httpFilters: Seq[EssentialFilter] =
-    super.httpFilters.filterNot(_ == securityHeadersFilter) :+ redirectHttpsFilter
+    super.httpFilters.filterNot(_ == securityHeadersFilter) //:+ redirectHttpsFilter
 
   lazy val router: Router = {
 

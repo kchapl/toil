@@ -17,4 +17,4 @@ GET         /surplus                    controllers.SurplusController.viewSurplu
 
 GET         /fix/dedup                  controllers.TransactionController.dedupTransactions()
 
-GET /admin/resources controllers.AdminController.viewResources()
+GET         /admin/resources            controllers.AdminController.viewResources()
