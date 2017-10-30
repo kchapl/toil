@@ -10,10 +10,9 @@ import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext, LoggerConfigurator}
 import play.filters.HttpFiltersComponents
-import play.filters.https.RedirectHttpsComponents
 import router.Routes
 import services.{GoogleSheetService, Sheet}
-import util.Flow
+import util.{Flow, HerokuRedirectHttpsComponents}
 
 import scala.util.Properties
 
@@ -31,11 +30,11 @@ class Components(ctx: Context)
   with HttpFiltersComponents
   with AssetsComponents
   with AhcWSComponents
-  with RedirectHttpsComponents {
+  with HerokuRedirectHttpsComponents {
 
   // todo reinstate
   override def httpFilters: Seq[EssentialFilter] =
-    super.httpFilters.filterNot(_ == securityHeadersFilter) //:+ redirectHttpsFilter
+    super.httpFilters.filterNot(_ == securityHeadersFilter) :+ herokuRedirectHttpsFilter
 
   lazy val router: Router = {
 
