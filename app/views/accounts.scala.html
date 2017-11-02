@@ -1,6 +1,6 @@
 @(accounts: Seq[model.AccountAndTransactions])
 
-@frame(title = "Accounts", highlightedNavItem = "Accounts") {
+@frame(title = "Accounts", highlightedNavItem = "Accounts") { }{
   @for((account, i) <- accounts.zipWithIndex) {
     <div class="panel panel-default">
       <div class="panel-heading">@account.account.name</div>

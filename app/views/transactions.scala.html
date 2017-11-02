@@ -2,7 +2,7 @@
 @import views.html.helper.CSRF
 @import model.Category
 
-@frame(title = "Transactions", highlightedNavItem = "Transactions") {
+@frame(title = "Transactions", highlightedNavItem = "Transactions") { }{
 <div class="panel panel-default">
 
   <div class="panel-body">
@@ -48,5 +48,9 @@
 
 </div>
 
-<script src="@routes.Assets.at("javascripts/transactions.js")"></script>
+  <script src="@routes.Assets.at("lib/jquery/jquery.min.js")"></script>
+  <script src="@routes.Assets.at("lib/bootstrap/js/bootstrap.min.js")"></script>
+  <script src="@routes.Assets.at("lib/datatables/js/jquery.dataTables.min.js")"></script>
+  <script src="@routes.Assets.at("lib/datatables/js/dataTables.bootstrap.min.js")"></script>
+  <script src="@routes.Assets.at("javascripts/transactions.js")"></script>
 }

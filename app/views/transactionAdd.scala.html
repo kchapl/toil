@@ -2,7 +2,7 @@
 @import helper._
 @(form: Form[TransactionBinding], as: Seq[model.Account])(implicit request: RequestHeader, messages: Messages)
 
-@frame(title = "Add transaction", highlightedNavItem = "Add") {
+@frame(title = "Add transaction", highlightedNavItem = "Add") { }{
   @if(form.hasGlobalErrors) {
   <ul>
   @for(error <- form.globalErrors) {
