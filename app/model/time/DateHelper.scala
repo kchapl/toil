@@ -18,4 +18,8 @@ object DateHelper {
   def firstDayOfNextSeason(date: LocalDate): LocalDate = yearMonthOfNextSeason(date).atDay(1)
 
   def lastDayOfNextSeason(date: LocalDate): LocalDate = yearMonthOfNextSeason(date).plusMonths(2).atEndOfMonth
+
+  def firstDayOfNextYear(date: LocalDate): LocalDate = date.withDayOfYear(1).plusYears(1)
+
+  def lastDayOfNextYear(date: LocalDate): LocalDate = firstDayOfNextYear(date).plusYears(1).minusDays(1)
 }
