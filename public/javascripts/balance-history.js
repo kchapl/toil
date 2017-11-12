@@ -14,7 +14,10 @@ function chart(canvas) {
       labels: labels,
       datasets: [
         {
-          data: balances
+          data: balances,
+          fill: false,
+          borderColor: 'cornflowerblue',
+          borderWidth: 2
         }
       ]
     },
