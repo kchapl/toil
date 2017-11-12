@@ -1,6 +1,6 @@
 package model.time
 
-import java.time.{LocalDate, YearMonth}
+import java.time.{LocalDate, Year, YearMonth}
 
 import model.Transaction
 import model.time.DateHelper._
@@ -14,6 +14,8 @@ object DateRange extends App {
   private def nextMonth(date: LocalDate): DateRange = DateRange(firstDayOfNextMonth(date), lastDayOfNextMonth(date))
 
   private def nextSeason(date: LocalDate): DateRange = DateRange(firstDayOfNextSeason(date), lastDayOfNextSeason(date))
+
+  private def nextYear(date: LocalDate): DateRange = DateRange(firstDayOfNextYear(date), lastDayOfNextYear(date))
 
   private def forDates(dates: Seq[LocalDate]): DateRange =
     DateRange(dates.minBy(_.toEpochDay), dates.maxBy(_.toEpochDay))
@@ -37,4 +39,7 @@ object DateRange extends App {
 
   def groupBySeason(dateRange: DateRange): Seq[YearSeason] =
     groupBy(dateRange)(nextPeriod = nextSeason).map(range => YearSeason.from(range.start))
+
+  def groupByYear(dateRange: DateRange): Seq[Year] =
+    groupBy(dateRange)(nextPeriod = nextYear).map(range => Year.from(range.start))
 }
