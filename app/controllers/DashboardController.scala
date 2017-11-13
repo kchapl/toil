@@ -7,4 +7,8 @@ class DashboardController(components: ControllerComponents) extends AbstractCont
   def view = Action {
     Ok(views.html.dashboard())
   }
+
+  def view2 = Action {
+    Ok(views.html.dashboard2())
+  }
 }
