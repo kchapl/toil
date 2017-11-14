@@ -1,9 +1,9 @@
 package controllers
 
 import controllers.Attributes.credential
-import model.{Surpluses, Transaction}
+import model.{Sheet, Surpluses, Transaction}
 import play.api.mvc.{AbstractController, ControllerComponents, Request}
-import services.{Sheet, ValueService}
+import services.ValueService
 
 class SurplusController(
   components: ControllerComponents,

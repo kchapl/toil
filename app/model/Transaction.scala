@@ -4,7 +4,6 @@ import java.time.{LocalDate, ZoneId}
 
 import controllers.TransactionBinding
 import model.Account.byName
-import services.Row
 import util.Failure
 import util.Util.asOption
 

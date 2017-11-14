@@ -1,7 +1,5 @@
 package model
 
-import services.Row
-
 case class Account(name: String, accType: AccountType, originalBalance: Amount)
 
 object Account {

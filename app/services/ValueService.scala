@@ -2,6 +2,7 @@ package services
 
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse
+import model.{Row, Sheet}
 
 import scala.util.Try
 

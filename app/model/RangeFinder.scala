@@ -1,7 +1,5 @@
 package model
 
-import services.Range
-
 object RangeFinder {
 
   def indexToLetter(idx: Int): Char = (idx + 65).toChar

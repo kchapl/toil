@@ -4,6 +4,7 @@ import java.io.File
 import java.net.URLEncoder
 
 import controllers._
+import model.Sheet
 import play.api.ApplicationLoader.Context
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.EssentialFilter
@@ -12,7 +13,7 @@ import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext, L
 import play.filters.HttpFiltersComponents
 import play.filters.gzip.GzipFilterComponents
 import router.Routes
-import services.{GoogleSheetService, Sheet}
+import services.GoogleSheetService
 import util.{Flow, HerokuRedirectHttpsComponents}
 
 import scala.util.Properties
