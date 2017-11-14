@@ -1,4 +1,6 @@
-package services
+package model
+
+import services.Range
 
 object RangeFinder {
 
