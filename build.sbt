@@ -12,8 +12,8 @@ libraryDependencies ++= Seq(
     ExclusionRule(organization = "org.apache.httpcomponents", name = "httpclient"),
     ExclusionRule(organization = "com.fasterxml.jackson.core", name = "jackson-core")
   ),
-  "org.apache.httpcomponents"  % "httpclient"   % "4.5.3" % Runtime,
-  "com.fasterxml.jackson.core" % "jackson-core" % "2.9.2" % Runtime,
+  "org.apache.httpcomponents"  % "httpclient"   % "4.5.3",
+  "com.fasterxml.jackson.core" % "jackson-core" % "2.9.2",
   "org.webjars"                % "jquery"       % "3.2.1",
   "org.webjars"                % "bootstrap"    % "3.3.7-1",
   "org.webjars"                % "datatables"   % "1.10.15",
