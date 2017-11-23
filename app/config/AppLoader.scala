@@ -64,7 +64,7 @@ class Components(ctx: Context)
     new Routes(
       httpErrorHandler,
       assets,
-      new DashboardController(controllerComponents),
+      new DashboardController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),
       new AuthController(controllerComponents, wsClient, flow, redirectUri),
       new AccountController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),
       new TransactionController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),

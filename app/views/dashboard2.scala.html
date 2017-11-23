@@ -1,0 +1,24 @@
+@(dateAmounts: Seq[model.DateAmount])
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+  </head>
+  <body>
+    <h1>Dashboard</h1>
+    <div class="card">
+      <div class="card-header">Total holdings</div>
+      <div class="card-body">
+        <canvas id="chart"
+          data-labels='[@dateAmounts.map(_.date).mkString("\"", "\",\"", "\"")]'
+          data-balances="[@dateAmounts.map(_.amount.pounds).mkString(", ")]"></canvas>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script src="@routes.Assets.at("javascripts/balance-history.js")"></script>
+  </body>
+</html>
