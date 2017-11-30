@@ -36,8 +36,7 @@ class DashboardController(
         .map {
           case (date, amount) => DateAmount(date, amount)
         }
-        .toSeq
-    }
+    }.toSeq.sortBy(_.date.toString)
     Ok(views.html.dashboard2(dateBalances))
   }
 }
