@@ -5,6 +5,6 @@
   grid-gap: 20px;
 }
 
-.wrapper h1 {
+.wrapper nav {
   grid-column: 1 / span 2;
 }
