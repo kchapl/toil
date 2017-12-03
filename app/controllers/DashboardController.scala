@@ -19,14 +19,14 @@ class DashboardController(
   }
 
   def view2 = authAction { implicit request =>
+    val allTransactions = values.allRows(transactionSheet, request.attrs(credential)).map(Transaction.fromRow)
+    val allAccounts = values.allRows(accountSheet, request.attrs(credential)).map(Account.fromRow) map { account =>
+      AccountAndTransactions(
+        account,
+        allTransactions.filter(_.account == account.name).toSet
+      )
+    }
     val dateBalances = {
-      val allTransactions = values.allRows(transactionSheet, request.attrs(credential)).map(Transaction.fromRow)
-      val allAccounts = values.allRows(accountSheet, request.attrs(credential)).map(Account.fromRow) map { account =>
-        AccountAndTransactions(
-          account,
-          allTransactions.filter(_.account == account.name).toSet
-        )
-      }
       allAccounts
         .flatMap(_.dateBalances)
         .groupBy(_.date)
@@ -37,6 +37,6 @@ class DashboardController(
           case (date, amount) => DateAmount(date, amount)
         }
     }.toSeq.sortBy(_.date.toString)
-    Ok(views.html.dashboard2(dateBalances))
+    Ok(views.html.dashboard2(dateBalances, allAccounts))
   }
 }

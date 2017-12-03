@@ -8,3 +8,8 @@
 .wrapper nav {
   grid-column: 1 / span 2;
 }
+
+.account-list li {
+  display: flex;
+  justify-content: space-between;
+}

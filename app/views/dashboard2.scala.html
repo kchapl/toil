@@ -1,4 +1,15 @@
-@(dateAmounts: Seq[model.DateAmount])
+@import java.time.format.DateTimeFormatter
+@import java.time.format.FormatStyle
+@import model._
+@(dateAmounts: Seq[DateAmount], accounts: Seq[AccountAndTransactions])
+
+@dateOfLatestTransaction(account: AccountAndTransactions) = @{
+  account.transactions.toSeq.maxBy(_.date.toString).date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
+}
+
+@balance(account: AccountAndTransactions) = @{
+  Amount.sum(account.transactions.toSeq.map(_.amount) :+ account.account.originalBalance).formatted
+}
 
 <!doctype html>
 <html lang="en">
@@ -25,6 +36,19 @@
         <canvas id="chart"
         data-labels='[@dateAmounts.map(_.date).mkString("\"", "\",\"", "\"")]'
         data-balances="[@dateAmounts.map(_.amount.pounds).mkString(", ")]"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Latest balances</div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush account-list">
+          @for(account <- accounts) {
+            <li class="list-group-item">
+              <span>@account.account.name (as of @dateOfLatestTransaction(account))</span>
+              <span>@balance(account)</span>
+            </li>
+          }
+        </ul>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
