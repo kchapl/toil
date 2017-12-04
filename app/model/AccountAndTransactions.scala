@@ -22,9 +22,8 @@ case class AccountAndTransactions(account: Account, transactions: Set[Transactio
       }
     }
 
-    val diffs = DateAmount.fromTransactions(transactions).foldLeft(Seq.empty[DateAmount]) {
-      (soFar, curr) =>
-        soFar ++ soFar.lastOption.map(a => filling(a, curr)).getOrElse(Nil) :+ curr
+    val diffs = DateAmount.fromTransactions(transactions).foldLeft(Seq.empty[DateAmount]) { (soFar, curr) =>
+      soFar ++ soFar.lastOption.map(a => filling(a, curr)).getOrElse(Nil) :+ curr
     }
 
     go(diffs)
@@ -53,4 +52,10 @@ case class AccountAndTransactions(account: Account, transactions: Set[Transactio
 
     go(a.date.plusDays(1), Nil)
   }
+
+  private val transactionSeq = transactions.toSeq
+
+  val latestTransaction: Transaction = transactionSeq.maxBy(_.date.toString)
+
+  val balance: Amount = Amount.sum(transactionSeq.map(_.amount) :+ account.originalBalance)
 }

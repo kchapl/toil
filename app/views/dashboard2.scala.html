@@ -4,11 +4,7 @@
 @(dateAmounts: Seq[DateAmount], accounts: Seq[AccountAndTransactions])
 
 @dateOfLatestTransaction(account: AccountAndTransactions) = @{
-  account.transactions.toSeq.maxBy(_.date.toString).date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
-}
-
-@balance(account: AccountAndTransactions) = @{
-  Amount.sum(account.transactions.toSeq.map(_.amount) :+ account.account.originalBalance).formatted
+  account.latestTransaction.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
 }
 
 <!doctype html>
@@ -45,7 +41,7 @@
           @for(account <- accounts) {
             <li class="list-group-item">
               <span>@account.account.name (as of @dateOfLatestTransaction(account))</span>
-              <span>@balance(account)</span>
+              <span>@account.balance.formatted</span>
             </li>
           }
         </ul>

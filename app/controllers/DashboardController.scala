@@ -20,12 +20,16 @@ class DashboardController(
 
   def view2 = authAction { implicit request =>
     val allTransactions = values.allRows(transactionSheet, request.attrs(credential)).map(Transaction.fromRow)
-    val allAccounts = values.allRows(accountSheet, request.attrs(credential)).map(Account.fromRow) map { account =>
-      AccountAndTransactions(
-        account,
-        allTransactions.filter(_.account == account.name).toSet
-      )
-    }
+    val allAccounts = values
+      .allRows(accountSheet, request.attrs(credential))
+      .map(Account.fromRow)
+      .map { account =>
+        AccountAndTransactions(
+          account,
+          allTransactions.filter(_.account == account.name).toSet
+        )
+      }
+      .sortBy(_.latestTransaction.date.toString)
     val dateBalances = {
       allAccounts
         .flatMap(_.dateBalances)
