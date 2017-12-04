@@ -1,6 +1,9 @@
 package model
 
 import java.time.LocalDate
+import java.time.LocalDate.now
+
+import model.Amount.zero
 
 import scala.annotation.tailrec
 
@@ -9,11 +12,7 @@ case class AccountAndTransactions(account: Account, transactions: Set[Transactio
   val dateBalances: Seq[DateAmount] = {
 
     @tailrec
-    def go(
-      left: Seq[DateAmount],
-      soFar: Seq[DateAmount] = Nil,
-      prevBalance: Amount = account.originalBalance
-    ): Seq[DateAmount] = {
+    def go(left: Seq[DateAmount], soFar: Seq[DateAmount], prevBalance: Amount): Seq[DateAmount] = {
       left match {
         case hd :: tl =>
           val currBalance = Amount.sum(Seq(prevBalance, hd.amount))
@@ -22,14 +21,27 @@ case class AccountAndTransactions(account: Account, transactions: Set[Transactio
       }
     }
 
-    val diffs = DateAmount.fromTransactions(transactions).foldLeft(Seq.empty[DateAmount]) { (soFar, curr) =>
-      soFar ++ soFar.lastOption.map(a => filling(a, curr)).getOrElse(Nil) :+ curr
+    val diffs = {
+      val dateAmounts = DateAmount.fromTransactions(transactions)
+      dateAmounts.lastOption
+        .filter { dateAmount =>
+          dateAmount.date.isBefore(now)
+        }
+        .map { _ =>
+          dateAmounts :+ DateAmount(now, zero)
+        }
+        .getOrElse {
+          dateAmounts
+        }
+        .foldLeft(Seq.empty[DateAmount]) { (soFar, amount) =>
+          soFar ++ soFar.lastOption.map(last => filledIn(last, amount)).getOrElse(Nil) :+ amount
+        }
     }
 
-    go(diffs)
+    go(diffs, Nil, account.originalBalance)
   }
 
-  private def filling(a: DateAmount, b: DateAmount): Seq[DateAmount] = {
+  private def filledIn(a: DateAmount, b: DateAmount): Seq[DateAmount] = {
 
     val end: LocalDate = b.date
 
