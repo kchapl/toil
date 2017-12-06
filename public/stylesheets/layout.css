@@ -1,15 +1,36 @@
 .wrapper {
   margin: 2em;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   grid-gap: 20px;
 }
 
 .wrapper nav {
+  grid-column: 1 / span 3;
+}
+
+.holdings-chart {
   grid-column: 1 / span 2;
 }
 
+.year-progress {
+  grid-column: 1;
+}
+
+.season-progress {
+  grid-column: 2;
+}
+
+.month-progress {
+  grid-column: 3;
+}
+
 .account-list li {
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-text {
   display: flex;
   justify-content: space-between;
 }

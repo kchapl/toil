@@ -1,10 +1,47 @@
-@import java.time.format.DateTimeFormatter
-@import java.time.format.FormatStyle
+@import java.time.LocalDate
+@import java.time.LocalDate.now
+@import java.time.format.{DateTimeFormatter, FormatStyle}
+
 @import model._
 @(dateAmounts: Seq[DateAmount], accounts: Seq[AccountAndTransactions])
 
-@dateOfLatestTransaction(account: AccountAndTransactions) = @{
-  account.latestTransaction.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
+@formattedDate(date: LocalDate) = @{
+  date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
+}
+
+@balance(date: LocalDate) = @{
+  dateAmounts.find(_.date == date).get.amount
+}
+
+@gainSince(date: LocalDate) = @{
+  balance(now).minus(balance(date))
+}
+
+@upOrDownSince(date: LocalDate) = {
+  @if(gainSince(date).isPos) {
+    <span class="oi oi-arrow-thick-top" title="icon name" aria-hidden="true"></span>
+  } else {
+    <span class="oi oi-arrow-thick-bottom" title="icon name" aria-hidden="true"></span>
+  }
+}
+
+@progressSince(date: LocalDate) = {
+  <div class="card-text progress-text">
+    <span>@formattedDate(date)</span>
+    <span>@balance(date).formatted</span>
+    <span>
+      @upOrDownSince(date)
+      @gainSince(date).abs.formatted
+    </span>
+  </div>
+}
+
+@progressCardClass(date: LocalDate) = @{
+  if(gainSince(date).isPos) {
+    "card text-white bg-success"
+  } else {
+    "card text-white bg-danger"
+  }
 }
 
 <!doctype html>
@@ -15,6 +52,7 @@
     <title>Toil: Dashboard</title>
     <link href="@routes.Assets.at("stylesheets/layout.css")" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link href="@routes.Assets.at("stylesheets/open-iconic/font/css/open-iconic-bootstrap.css")" rel="stylesheet">
   </head>
   <body class="wrapper">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -26,7 +64,7 @@
         <li class="nav-item"><a class="nav-link" href="/surplus">Surplus</a></li>
       </ul>
     </nav>
-    <div class="card">
+    <div class="card holdings-chart">
       <div class="card-header">Total holdings</div>
       <div class="card-body">
         <canvas id="chart"
@@ -40,12 +78,24 @@
         <ul class="list-group list-group-flush account-list">
           @for(account <- accounts) {
             <li class="list-group-item">
-              <span>@account.account.name (as of @dateOfLatestTransaction(account))</span>
+              <span>@account.account.name (as of @formattedDate(account.latestTransaction.date))</span>
               <span>@account.balance.formatted</span>
             </li>
           }
         </ul>
       </div>
+    </div>
+    <div class="@progressCardClass(now.minusYears(1)) year-progress">
+      <div class="card-header">Year</div>
+      <div class="card-body">@progressSince(now.minusYears(1))</div>
+    </div>
+    <div class="@progressCardClass(now.minusMonths(3)) season-progress">
+      <div class="card-header">Season</div>
+      <div class="card-body">@progressSince(now.minusMonths(3))</div>
+    </div>
+    <div class="@progressCardClass(now.minusMonths(1)) month-progress">
+      <div class="card-header">Month</div>
+      <div class="card-body">@progressSince(now.minusMonths(1))</div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <script src="@routes.Assets.at("javascripts/balance-history.js")"></script>
