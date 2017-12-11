@@ -3,21 +3,26 @@ package model
 sealed trait AccountType { def name: String }
 
 case object Current extends AccountType {
-  override def name = "Current"
+  override val name = "Current"
 }
 
 case object Credit extends AccountType {
-  override def name = "Credit"
+  override val name = "Credit"
 }
 
 case object Savings extends AccountType {
-  override def name = "Savings"
+  override val name = "Savings"
+}
+
+case object Loan extends AccountType {
+  override val name = "Loan"
 }
 
 object AccountType {
   def fromName(name: String): AccountType = name match {
-    case n if n == Current.name => Current
-    case n if n == Credit.name => Credit
-    case n if n == Savings.name => Savings
+    case Current.name => Current
+    case Credit.name  => Credit
+    case Savings.name => Savings
+    case Loan.name    => Loan
   }
 }
