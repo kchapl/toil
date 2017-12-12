@@ -6,7 +6,7 @@ object Util {
     es.foldRight(Right(Nil): Either[A, List[B]]) { (e, acc) =>
       for {
         xs <- acc.right
-        x <- e.right
+        x  <- e.right
       } yield x :: xs
     }
 

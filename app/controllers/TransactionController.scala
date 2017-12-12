@@ -13,13 +13,13 @@ import scala.io.Source
 import scala.util.{Failure, Success}
 
 class TransactionController(
-  components: ControllerComponents,
-  authAction: AuthorisedAction,
-  values: ValueService,
-  accountSheet: Sheet,
-  transactionSheet: Sheet
+    components: ControllerComponents,
+    authAction: AuthorisedAction,
+    values: ValueService,
+    accountSheet: Sheet,
+    transactionSheet: Sheet
 ) extends AbstractController(components)
-  with I18nSupport {
+    with I18nSupport {
 
   private def toRow(tx: Transaction) = Seq(
     tx.account,
@@ -48,8 +48,8 @@ class TransactionController(
     Ok(views.html.transactionsImport(fetchAllAccounts(request)))
   }
 
-  def importTransactions(): Action[MultipartFormData[Files.TemporaryFile]] = authAction(parse.multipartFormData) {
-    request =>
+  def importTransactions(): Action[MultipartFormData[Files.TemporaryFile]] =
+    authAction(parse.multipartFormData) { request =>
       request.body.file("transactions") map { filePart =>
         Transaction.toImport(
           before = fetchAllTransactions(request).toSet,
@@ -69,7 +69,7 @@ class TransactionController(
       } getOrElse {
         InternalServerError("Transaction import failed")
       }
-  }
+    }
 
   val transactionForm = Form(
     mapping(
@@ -87,10 +87,11 @@ class TransactionController(
     Ok(views.html.transactionAdd(transactionForm, fetchAllAccounts(request)))
   }
 
-  def addTransaction(): Action[TransactionBinding] = authAction(parse.form(transactionForm)) { implicit request =>
-    val transaction = Transaction.fromBinding(request.body)
-    values.appendRows(transactionSheet, Seq(toRow(transaction)), request.attrs(credential))
-    Redirect(routes.TransactionController.viewTransactions())
+  def addTransaction(): Action[TransactionBinding] = authAction(parse.form(transactionForm)) {
+    implicit request =>
+      val transaction = Transaction.fromBinding(request.body)
+      values.appendRows(transactionSheet, Seq(toRow(transaction)), request.attrs(credential))
+      Redirect(routes.TransactionController.viewTransactions())
   }
 
   def updateTransaction(): Action[AnyContent] = authAction { request =>

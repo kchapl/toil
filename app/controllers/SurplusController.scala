@@ -6,10 +6,10 @@ import play.api.mvc.{AbstractController, ControllerComponents, Request}
 import services.ValueService
 
 class SurplusController(
-  components: ControllerComponents,
-  authAction: AuthorisedAction,
-  values: ValueService,
-  transactionSheet: Sheet
+    components: ControllerComponents,
+    authAction: AuthorisedAction,
+    values: ValueService,
+    transactionSheet: Sheet
 ) extends AbstractController(components) {
 
   private def fetchAllTransactions[A](request: Request[A]): Seq[Transaction] =

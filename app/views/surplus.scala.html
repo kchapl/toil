@@ -1,9 +1,9 @@
 @(surpluses: model.Surpluses)
 
 @chart(title: String, labels: Seq[String], figures: Seq[model.SurplusFigures]) = {
-  <div class="panel panel-default">
-    <div class="panel-heading">@title</div>
-    <div class="panel-body">
+  <div class="card in-out">
+    <div class="card-header">@title</div>
+    <div class="card-body">
       <canvas id="monthly-chart"
         width="200" height="200"
         data-labels="[@labels.mkString("\"", "\",\"", "\"")]"
@@ -15,9 +15,7 @@
   </div>
 }
 
-@frame(title = "Surplus", highlightedNavItem = "Surplus") {
-  <link href="@routes.Assets.at("lib/datatables/css/dataTables.bootstrap.min.css")" rel="stylesheet">
-  }{
+@frame(title = "Surplus") {
 
   @chart(
     title = "Monthly",

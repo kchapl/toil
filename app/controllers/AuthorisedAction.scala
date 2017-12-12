@@ -13,19 +13,20 @@ import util.Flow
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthorisedAction(
-  val parser: BodyParser[AnyContent],
-  flow: Flow,
-  redirectUri: String
+    val parser: BodyParser[AnyContent],
+    flow: Flow,
+    redirectUri: String
 )(
-  implicit val executionContext: ExecutionContext
+    implicit val executionContext: ExecutionContext
 ) extends ActionBuilder[Request, AnyContent]
-  with ActionRefiner[Request, Request] {
+    with ActionRefiner[Request, Request] {
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, Request[A]]] =
     Future.successful {
       request.session.get(key) flatMap { userId =>
-        Option(flow.readWrite.loadCredential(userId)) filter (_.getExpiresInSeconds > 0) map { credential =>
-          Right(request.addAttr(Attributes.credential, credential))
+        Option(flow.readWrite.loadCredential(userId)) filter (_.getExpiresInSeconds > 0) map {
+          credential =>
+            Right(request.addAttr(Attributes.credential, credential))
         }
       } getOrElse Left(onUnauthorised(request, UserId(request)))
     }

@@ -11,13 +11,13 @@ import scala.annotation.tailrec
 import scala.io.Source
 
 case class Transaction(
-  account: String,
-  date: LocalDate,
-  payee: String,
-  reference: Option[String],
-  mode: Option[String],
-  amount: Amount,
-  category: Category
+    account: String,
+    date: LocalDate,
+    payee: String,
+    reference: Option[String],
+    mode: Option[String],
+    amount: Amount,
+    category: Category
 ) {
 
   override def equals(obj: Any): Boolean = obj match {
@@ -61,10 +61,10 @@ object Transaction {
   }
 
   def toImport(
-    before: Set[Transaction],
-    accounts: Set[Account],
-    accountName: String,
-    source: Source
+      before: Set[Transaction],
+      accounts: Set[Account],
+      accountName: String,
+      source: Source
   ): Either[Failure, Set[Transaction]] =
     accounts.find(byName(accountName)) map { a =>
       Right(parsed(a, source) -- before)

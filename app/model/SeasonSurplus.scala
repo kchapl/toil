@@ -3,6 +3,6 @@ package model
 import model.time.YearSeason
 
 case class SeasonSurplus(
-  yearSeason: YearSeason,
-  figures: SurplusFigures
+    yearSeason: YearSeason,
+    figures: SurplusFigures
 )

@@ -1,7 +1,6 @@
 GET         /assets/*file               controllers.Assets.at(path="/public", file)
 
 GET         /                           controllers.DashboardController.view()
-GET         /d                           controllers.DashboardController.view2()
 
 GET         /oauth2callback             controllers.AuthController.authCallback(code,state)
 

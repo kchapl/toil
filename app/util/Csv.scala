@@ -10,9 +10,9 @@ object Csv {
     def go(acc: Seq[String], accPart: String, inQuotes: Boolean, rest: Seq[Char]): Seq[String] = {
       rest match {
         case ',' :: tail if !inQuotes => go(acc :+ accPart, "", inQuotes, tail)
-        case '"' :: tail => go(acc, accPart, inQuotes = !inQuotes, tail)
-        case ch :: tail => go(acc, accPart + ch, inQuotes, tail)
-        case _ => acc :+ accPart
+        case '"' :: tail              => go(acc, accPart, inQuotes = !inQuotes, tail)
+        case ch :: tail               => go(acc, accPart + ch, inQuotes, tail)
+        case _                        => acc :+ accPart
       }
     }
 

@@ -12,13 +12,15 @@ trait ValueService {
 
   def appendRows(sheet: Sheet, rows: Seq[Row], credential: Credential): Int
 
-  def replaceAllRows(sheet: Sheet, replacements: Seq[Row], credential: Credential): Either[String, Unit]
+  def replaceAllRows(sheet: Sheet,
+                     replacements: Seq[Row],
+                     credential: Credential): Either[String, Unit]
 
   def updateCellValue(
-    sheetName: String,
-    rowIdx: Int,
-    colIdx: Int,
-    updateTo: String,
-    credential: Credential
+      sheetName: String,
+      rowIdx: Int,
+      colIdx: Int,
+      updateTo: String,
+      credential: Credential
   ): Try[UpdateValuesResponse]
 }

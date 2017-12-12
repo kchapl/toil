@@ -8,10 +8,10 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 import util.Flow
 
 class AuthController(
-  components: ControllerComponents,
-  ws: WSClient,
-  flow: Flow,
-  redirectUri: String
+    components: ControllerComponents,
+    ws: WSClient,
+    flow: Flow,
+    redirectUri: String
 ) extends AbstractController(components) {
 
   def authCallback(code: String, state: String) = Action { implicit request =>

@@ -11,16 +11,20 @@ case class DateRange(start: LocalDate, end: LocalDate)
 
 object DateRange extends App {
 
-  private def nextMonth(date: LocalDate): DateRange = DateRange(firstDayOfNextMonth(date), lastDayOfNextMonth(date))
+  private def nextMonth(date: LocalDate): DateRange =
+    DateRange(firstDayOfNextMonth(date), lastDayOfNextMonth(date))
 
-  private def nextSeason(date: LocalDate): DateRange = DateRange(firstDayOfNextSeason(date), lastDayOfNextSeason(date))
+  private def nextSeason(date: LocalDate): DateRange =
+    DateRange(firstDayOfNextSeason(date), lastDayOfNextSeason(date))
 
-  private def nextYear(date: LocalDate): DateRange = DateRange(firstDayOfNextYear(date), lastDayOfNextYear(date))
+  private def nextYear(date: LocalDate): DateRange =
+    DateRange(firstDayOfNextYear(date), lastDayOfNextYear(date))
 
   private def forDates(dates: Seq[LocalDate]): DateRange =
     DateRange(dates.minBy(_.toEpochDay), dates.maxBy(_.toEpochDay))
 
-  def forTransactions(transactions: Seq[Transaction]): DateRange = forDates(transactions.map(_.date))
+  def forTransactions(transactions: Seq[Transaction]): DateRange =
+    forDates(transactions.map(_.date))
 
   private def groupBy(dateRange: DateRange)(nextPeriod: LocalDate => DateRange): Seq[DateRange] = {
 

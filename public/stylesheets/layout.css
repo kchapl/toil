@@ -9,6 +9,10 @@
   grid-column: 1 / span 6;
 }
 
+.account-chart {
+  grid-column: 2 / span 4;
+}
+
 .holdings-chart {
   grid-column: 1 / span 3;
 }
@@ -37,4 +41,12 @@
 .progress-text {
   display: flex;
   justify-content: space-between;
+}
+
+.in-out {
+  grid-column: span 2;
+}
+
+.transactions {
+  grid-column: 2 / span 4;
 }

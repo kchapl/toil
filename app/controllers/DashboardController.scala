@@ -7,19 +7,16 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 import services.ValueService
 
 class DashboardController(
-  components: ControllerComponents,
-  authAction: AuthorisedAction,
-  values: ValueService,
-  accountSheet: Sheet,
-  transactionSheet: Sheet
+    components: ControllerComponents,
+    authAction: AuthorisedAction,
+    values: ValueService,
+    accountSheet: Sheet,
+    transactionSheet: Sheet
 ) extends AbstractController(components) {
 
-  def view = Action {
-    Ok(views.html.dashboard())
-  }
-
-  def view2 = authAction { implicit request =>
-    val allTransactions = values.allRows(transactionSheet, request.attrs(credential)).map(Transaction.fromRow)
+  def view = authAction { implicit request =>
+    val allTransactions =
+      values.allRows(transactionSheet, request.attrs(credential)).map(Transaction.fromRow)
     val allAccounts = values
       .allRows(accountSheet, request.attrs(credential))
       .map(Account.fromRow)
@@ -41,6 +38,6 @@ class DashboardController(
           case (date, amount) => DateAmount(date, amount)
         }
     }.toSeq.sortBy(_.date.toString)
-    Ok(views.html.dashboard2(dateBalances, allAccounts))
+    Ok(views.html.dashboard(dateBalances, allAccounts))
   }
 }

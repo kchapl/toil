@@ -15,7 +15,9 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 import scala.util.control.NonFatal
 
-class GoogleSheetService(appName: String, sheetFileId: String) extends ValueService with ResourceService {
+class GoogleSheetService(appName: String, sheetFileId: String)
+    extends ValueService
+    with ResourceService {
 
   private val transport   = GoogleNetHttpTransport.newTrustedTransport
   private val jsonFactory = JacksonFactory.getDefaultInstance
@@ -62,7 +64,9 @@ class GoogleSheetService(appName: String, sheetFileId: String) extends ValueServ
         0
     }
 
-  def replaceAllRows(sheet: Sheet, replacements: Seq[Row], credential: Credential): Either[String, Unit] = {
+  def replaceAllRows(sheet: Sheet,
+                     replacements: Seq[Row],
+                     credential: Credential): Either[String, Unit] = {
     try {
       Right {
         val values = valuesService(credential)
@@ -79,11 +83,11 @@ class GoogleSheetService(appName: String, sheetFileId: String) extends ValueServ
   }
 
   def updateCellValue(
-    sheetName: String,
-    rowIdx: Int,
-    colIdx: Int,
-    updateTo: String,
-    credential: Credential
+      sheetName: String,
+      rowIdx: Int,
+      colIdx: Int,
+      updateTo: String,
+      credential: Credential
   ): Try[UpdateValuesResponse] =
     Try(
       valuesService(credential)
@@ -97,9 +101,10 @@ class GoogleSheetService(appName: String, sheetFileId: String) extends ValueServ
     )
 
   override def fetchUsage(credential: Credential): Usage = {
-    val used = sheetsService(credential).get(sheetFileId).execute().getSheets.asScala.foldRight(0) { (sheet, acc) =>
-      val props = sheet.getProperties.getGridProperties
-      acc + props.getRowCount * props.getColumnCount
+    val used = sheetsService(credential).get(sheetFileId).execute().getSheets.asScala.foldRight(0) {
+      (sheet, acc) =>
+        val props = sheet.getProperties.getGridProperties
+        acc + props.getRowCount * props.getColumnCount
     }
     Usage(used, 2000000)
   }

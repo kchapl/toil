@@ -28,16 +28,17 @@ class AppLoader extends ApplicationLoader {
 }
 
 class Components(ctx: Context)
-  extends BuiltInComponentsFromContext(ctx)
-  with HttpFiltersComponents
-  with AssetsComponents
-  with AhcWSComponents
-  with GzipFilterComponents
-  with HerokuRedirectHttpsComponents {
+    extends BuiltInComponentsFromContext(ctx)
+    with HttpFiltersComponents
+    with AssetsComponents
+    with AhcWSComponents
+    with GzipFilterComponents
+    with HerokuRedirectHttpsComponents {
 
   // todo reinstate
   override def httpFilters: Seq[EssentialFilter] =
-    super.httpFilters.filterNot(_ == securityHeadersFilter) :+ herokuRedirectHttpsFilter :+ gzipFilter
+    super.httpFilters
+      .filterNot(_ == securityHeadersFilter) :+ herokuRedirectHttpsFilter :+ gzipFilter
 
   lazy val router: Router = {
 
@@ -64,10 +65,22 @@ class Components(ctx: Context)
     new Routes(
       httpErrorHandler,
       assets,
-      new DashboardController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),
+      new DashboardController(controllerComponents,
+                              authAction,
+                              googleSheets,
+                              accountSheet,
+                              transactionSheet),
       new AuthController(controllerComponents, wsClient, flow, redirectUri),
-      new AccountController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),
-      new TransactionController(controllerComponents, authAction, googleSheets, accountSheet, transactionSheet),
+      new AccountController(controllerComponents,
+                            authAction,
+                            googleSheets,
+                            accountSheet,
+                            transactionSheet),
+      new TransactionController(controllerComponents,
+                                authAction,
+                                googleSheets,
+                                accountSheet,
+                                transactionSheet),
       new SurplusController(controllerComponents, authAction, googleSheets, transactionSheet),
       new AdminController(controllerComponents, authAction, googleSheets)
     )

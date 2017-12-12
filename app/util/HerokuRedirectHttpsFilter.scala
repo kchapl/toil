@@ -13,7 +13,8 @@ import play.api.Logger
   * Based on play.filters.https.RedirectHttpsFilter
   */
 @Singleton
-class HerokuRedirectHttpsFilter @Inject()(config: RedirectHttpsConfiguration) extends EssentialFilter {
+class HerokuRedirectHttpsFilter @Inject()(config: RedirectHttpsConfiguration)
+    extends EssentialFilter {
 
   import util.RedirectHttpsKeys._
   import config._
@@ -53,10 +54,10 @@ class HerokuRedirectHttpsFilter @Inject()(config: RedirectHttpsConfiguration) ex
 }
 
 case class RedirectHttpsConfiguration(
-  strictTransportSecurity: Option[String] = Some("max-age=31536000; includeSubDomains"),
-  redirectStatusCode: Int = PERMANENT_REDIRECT,
-  sslPort: Option[Int] = None, // should match up to ServerConfig.sslPort
-  redirectEnabled: Boolean = true
+    strictTransportSecurity: Option[String] = Some("max-age=31536000; includeSubDomains"),
+    redirectStatusCode: Int = PERMANENT_REDIRECT,
+    sslPort: Option[Int] = None, // should match up to ServerConfig.sslPort
+    redirectEnabled: Boolean = true
 ) {
   def hstsEnabled: Boolean = redirectEnabled && strictTransportSecurity.isDefined
 }
@@ -70,7 +71,7 @@ private object RedirectHttpsKeys {
 
 @Singleton
 class RedirectHttpsConfigurationProvider @Inject()(c: Configuration, e: Environment)
-  extends Provider[RedirectHttpsConfiguration] {
+    extends Provider[RedirectHttpsConfiguration] {
   import util.RedirectHttpsKeys._
 
   private val logger = Logger(getClass)
@@ -79,7 +80,8 @@ class RedirectHttpsConfigurationProvider @Inject()(c: Configuration, e: Environm
     val strictTransportSecurity = c.get[Option[String]](stsPath)
     val redirectStatusCode      = c.get[Int](statusCodePath)
     if (!isRedirect(redirectStatusCode)) {
-      throw c.reportError(statusCodePath, s"Status Code $redirectStatusCode is not a Redirect status code!")
+      throw c.reportError(statusCodePath,
+                          s"Status Code $redirectStatusCode is not a Redirect status code!")
     }
     val port = c.get[Option[Int]](portPath)
     val redirectEnabled = c.get[Option[Boolean]](redirectEnabledPath).getOrElse {
@@ -97,10 +99,10 @@ class RedirectHttpsConfigurationProvider @Inject()(c: Configuration, e: Environm
 }
 
 class HerokuRedirectHttpsModule
-  extends SimpleModule(
-    bind[RedirectHttpsConfiguration].toProvider[RedirectHttpsConfigurationProvider],
-    bind[HerokuRedirectHttpsFilter].toSelf
-  )
+    extends SimpleModule(
+      bind[RedirectHttpsConfiguration].toProvider[RedirectHttpsConfigurationProvider],
+      bind[HerokuRedirectHttpsFilter].toSelf
+    )
 
 trait HerokuRedirectHttpsComponents {
   def configuration: Configuration

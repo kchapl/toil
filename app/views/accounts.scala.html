@@ -1,10 +1,10 @@
 @(accounts: Seq[model.AccountAndTransactions])
 
-@frame(title = "Accounts", highlightedNavItem = "Accounts") { }{
+@frame(title = "Accounts") {
   @for((account, i) <- accounts.zipWithIndex) {
-    <div class="panel panel-default">
-      <div class="panel-heading">@account.account.name</div>
-      <div class="panel-body">
+    <div class="card account-chart">
+      <div class="card-header">@account.account.name</div>
+      <div class="card-body">
         <canvas id="chart"
         width="200" height="200"
         data-labels="[@account.dateBalances.map(_.date).mkString("\"", "\",\"", "\"")]"

@@ -1,153 +1,83 @@
-@frame(title = "TODO", highlightedNavItem = "Overview") { }{
-    <div class="row placeholders">
-        <div class="col-xs-6 col-sm-3 placeholder">
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-            <h4>Label</h4>
-            <span class="text-muted">Something else</span>
-        </div>
-        <div class="col-xs-6 col-sm-3 placeholder">
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-            <h4>Label</h4>
-            <span class="text-muted">Something else</span>
-        </div>
-        <div class="col-xs-6 col-sm-3 placeholder">
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-            <h4>Label</h4>
-            <span class="text-muted">Something else</span>
-        </div>
-        <div class="col-xs-6 col-sm-3 placeholder">
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-            <h4>Label</h4>
-            <span class="text-muted">Something else</span>
-        </div>
-    </div>
+@import java.time.LocalDate
+@import java.time.LocalDate.now
+@import java.time.format.{DateTimeFormatter, FormatStyle}
 
-    <h2 class="sub-header">Section title</h2>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Header</th>
-                    <th>Header</th>
-                    <th>Header</th>
-                    <th>Header</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1,001</td>
-                    <td>Lorem</td>
-                    <td>ipsum</td>
-                    <td>dolor</td>
-                    <td>sit</td>
-                </tr>
-                <tr>
-                    <td>1,002</td>
-                    <td>amet</td>
-                    <td>consectetur</td>
-                    <td>adipiscing</td>
-                    <td>elit</td>
-                </tr>
-                <tr>
-                    <td>1,003</td>
-                    <td>Integer</td>
-                    <td>nec</td>
-                    <td>odio</td>
-                    <td>Praesent</td>
-                </tr>
-                <tr>
-                    <td>1,003</td>
-                    <td>libero</td>
-                    <td>Sed</td>
-                    <td>cursus</td>
-                    <td>ante</td>
-                </tr>
-                <tr>
-                    <td>1,004</td>
-                    <td>dapibus</td>
-                    <td>diam</td>
-                    <td>Sed</td>
-                    <td>nisi</td>
-                </tr>
-                <tr>
-                    <td>1,005</td>
-                    <td>Nulla</td>
-                    <td>quis</td>
-                    <td>sem</td>
-                    <td>at</td>
-                </tr>
-                <tr>
-                    <td>1,006</td>
-                    <td>nibh</td>
-                    <td>elementum</td>
-                    <td>imperdiet</td>
-                    <td>Duis</td>
-                </tr>
-                <tr>
-                    <td>1,007</td>
-                    <td>sagittis</td>
-                    <td>ipsum</td>
-                    <td>Praesent</td>
-                    <td>mauris</td>
-                </tr>
-                <tr>
-                    <td>1,008</td>
-                    <td>Fusce</td>
-                    <td>nec</td>
-                    <td>tellus</td>
-                    <td>sed</td>
-                </tr>
-                <tr>
-                    <td>1,009</td>
-                    <td>augue</td>
-                    <td>semper</td>
-                    <td>porta</td>
-                    <td>Mauris</td>
-                </tr>
-                <tr>
-                    <td>1,010</td>
-                    <td>massa</td>
-                    <td>Vestibulum</td>
-                    <td>lacinia</td>
-                    <td>arcu</td>
-                </tr>
-                <tr>
-                    <td>1,011</td>
-                    <td>eget</td>
-                    <td>nulla</td>
-                    <td>Class</td>
-                    <td>aptent</td>
-                </tr>
-                <tr>
-                    <td>1,012</td>
-                    <td>taciti</td>
-                    <td>sociosqu</td>
-                    <td>ad</td>
-                    <td>litora</td>
-                </tr>
-                <tr>
-                    <td>1,013</td>
-                    <td>torquent</td>
-                    <td>per</td>
-                    <td>conubia</td>
-                    <td>nostra</td>
-                </tr>
-                <tr>
-                    <td>1,014</td>
-                    <td>per</td>
-                    <td>inceptos</td>
-                    <td>himenaeos</td>
-                    <td>Curabitur</td>
-                </tr>
-                <tr>
-                    <td>1,015</td>
-                    <td>sodales</td>
-                    <td>ligula</td>
-                    <td>in</td>
-                    <td>libero</td>
-                </tr>
-            </tbody>
-        </table>
+@import model._
+@(dateAmounts: Seq[DateAmount], accounts: Seq[AccountAndTransactions])
+
+@formattedDate(date: LocalDate) = @{
+  date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
+}
+
+@balance(date: LocalDate) = @{
+  dateAmounts.find(_.date == date).get.amount
+}
+
+@gainSince(date: LocalDate) = @{
+  balance(now).minus(balance(date))
+}
+
+@upOrDownSince(date: LocalDate) = {
+  @if(gainSince(date).isPos) {
+    <span class="oi oi-arrow-thick-top" title="icon name" aria-hidden="true"></span>
+  } else {
+    <span class="oi oi-arrow-thick-bottom" title="icon name" aria-hidden="true"></span>
+  }
+}
+
+@progressSince(date: LocalDate) = {
+  <div class="card-text progress-text">
+    <span>@formattedDate(date)</span>
+    <span>@balance(date).formatted</span>
+    <span>
+      @upOrDownSince(date)
+      @gainSince(date).abs.formatted
+    </span>
+  </div>
+}
+
+@progressCardClass(date: LocalDate) = @{
+  if(gainSince(date).isPos) {
+    "card text-white bg-success"
+  } else {
+    "card text-white bg-danger"
+  }
+}
+
+@frame("Dashboard") {
+  <div class="card holdings-chart">
+    <div class="card-header">Total holdings</div>
+    <div class="card-body">
+      <canvas id="chart"
+      data-labels='[@dateAmounts.map(_.date).mkString("\"", "\",\"", "\"")]'
+      data-balances="[@dateAmounts.map(_.amount.pounds).mkString(", ")]"></canvas>
     </div>
+  </div>
+  <div class="card balance-list">
+    <div class="card-header">Latest balances</div>
+    <div class="card-body">
+      <ul class="list-group list-group-flush account-list">
+        @for(account <- accounts) {
+          <li class="list-group-item">
+            <span>@account.account.name (as of @formattedDate(account.latestTransaction.date))</span>
+            <span>@account.balance.formatted</span>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+  <div class="@progressCardClass(now.minusYears(1)) year-progress">
+    <div class="card-header">Year</div>
+    <div class="card-body">@progressSince(now.minusYears(1))</div>
+  </div>
+  <div class="@progressCardClass(now.minusMonths(3)) season-progress">
+    <div class="card-header">Season</div>
+    <div class="card-body">@progressSince(now.minusMonths(3))</div>
+  </div>
+  <div class="@progressCardClass(now.minusMonths(1)) month-progress">
+    <div class="card-header">Month</div>
+    <div class="card-body">@progressSince(now.minusMonths(1))</div>
+  </div>
+  <script src="@routes.Assets.at("lib/chartjs/Chart.min.js")"></script>
+  <script src="@routes.Assets.at("javascripts/balance-history.js")"></script>
 }

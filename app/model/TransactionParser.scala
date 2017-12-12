@@ -12,10 +12,10 @@ object TransactionParser {
   private def stripUnprintableChars(s: String) = s.replaceAll("[^ -~]", "")
 
   def parseLine(account: String)(
-    line: String,
-    payeeFrom: Seq[String] => String,
-    referenceFrom: Seq[String] => Option[String],
-    modeFrom: Seq[String] => Option[String]
+      line: String,
+      payeeFrom: Seq[String] => String,
+      referenceFrom: Seq[String] => Option[String],
+      modeFrom: Seq[String] => Option[String]
   ): Transaction = {
     val parsed = Csv.parse(stripUnprintableChars(line))
     Transaction(
