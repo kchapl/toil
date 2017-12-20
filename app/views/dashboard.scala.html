@@ -65,6 +65,12 @@
         }
       </ul>
     </div>
+    <div class="card-footer">
+      <div class="grand-total">
+        <span>TOTAL</span>
+        <span>@{Amount.sum(accounts.map(_.balance)).formatted}</span>
+      </div>
+    </div>
   </div>
   <div class="@progressCardClass(now.minusYears(1)) year-progress">
     <div class="card-header">Year</div>
