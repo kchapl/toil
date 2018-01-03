@@ -1,3 +1,4 @@
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.9")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.10")
 
-addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.14")
+// todo reinstate
+//addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.14")
