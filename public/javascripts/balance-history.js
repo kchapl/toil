@@ -17,7 +17,8 @@ function chart(canvas) {
           data: balances,
           fill: false,
           borderColor: 'cornflowerblue',
-          borderWidth: 2
+          borderWidth: 2,
+          radius: 1
         }
       ]
     },
