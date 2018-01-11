@@ -8,7 +8,7 @@ case class Surpluses(
     seasonal: Seq[SeasonSurplus],
     yearly: Seq[YearSurplus]
 ) {
-  def hasUncategorised: Boolean = monthly.exists { _.figures.uncategorised != Amount.zero }
+  def hasUncategorised: Boolean = monthly.exists(!_.figures.uncategorised.isEmpty)
 }
 
 object Surpluses {

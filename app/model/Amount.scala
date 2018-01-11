@@ -1,9 +1,12 @@
 package model
 
+import cats.Monoid
+
 case class Amount(pence: Int) {
 
-  val isPos: Boolean = pence > 0
-  val isNeg: Boolean = pence < 0
+  val isPos: Boolean   = pence > 0
+  val isNeg: Boolean   = pence < 0
+  val isEmpty: Boolean = pence == 0
 
   private def op(a: Amount)(f: (Int, Int) => Int): Amount = Amount(f(pence, a.pence))
 
@@ -21,9 +24,10 @@ object Amount {
 
   implicit val amountOrder: Ordering[Amount] = (left, right) => left.pence compare right.pence
 
-  val zero = Amount(0)
+  implicit val amountAdditionMonoid: Monoid[Amount] = new Monoid[Amount] {
+    def empty                         = Amount(0)
+    def combine(x: Amount, y: Amount) = Amount(x.pence + y.pence)
+  }
 
   def fromString(s: String): Amount = Amount((BigDecimal(s) * 100).toInt)
-
-  def sum(as: Seq[Amount]): Amount = as.foldLeft(Amount(0)) { case (acc, b) => acc.plus(b) }
 }

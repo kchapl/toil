@@ -1,7 +1,7 @@
 package controllers
 
+import cats.Monoid.combineAll
 import controllers.Attributes.credential
-import model.Amount.sum
 import model._
 import play.api.mvc.{AbstractController, ControllerComponents}
 import services.ValueService
@@ -32,7 +32,7 @@ class DashboardController(
         .flatMap(_.dateBalances)
         .groupBy(_.date)
         .mapValues { amounts =>
-          sum(amounts.map(_.amount))
+          combineAll(amounts.map(_.amount))
         }
         .map {
           case (date, amount) => DateAmount(date, amount)

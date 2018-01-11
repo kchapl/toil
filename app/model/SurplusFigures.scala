@@ -1,5 +1,7 @@
 package model
 
+import cats.Monoid.combineAll
+
 case class SurplusFigures(
     income: Amount,
     spend: Amount,
@@ -15,8 +17,7 @@ object SurplusFigures {
 
   def fromTransactions(ts: Seq[Transaction]): SurplusFigures = {
 
-    def sum(p: Transaction => Boolean) =
-      ts.filter(p).map(_.amount.abs).foldLeft(Amount.zero)(_ plus _)
+    def sum(p: Transaction => Boolean) = combineAll(ts.filter(p).map(_.amount.abs))
 
     SurplusFigures(
       income = sum(_.isIncome),

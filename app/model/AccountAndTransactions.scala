@@ -3,7 +3,8 @@ package model
 import java.time.LocalDate
 import java.time.LocalDate.now
 
-import model.Amount.zero
+import cats.Monoid.combineAll
+import cats.implicits._
 
 import scala.annotation.tailrec
 
@@ -15,7 +16,7 @@ case class AccountAndTransactions(account: Account, transactions: Set[Transactio
     def go(left: Seq[DateAmount], soFar: Seq[DateAmount], prevBalance: Amount): Seq[DateAmount] = {
       left match {
         case hd :: tl =>
-          val currBalance = Amount.sum(Seq(prevBalance, hd.amount))
+          val currBalance = prevBalance |+| hd.amount
           go(tl, soFar :+ hd.copy(amount = currBalance), currBalance)
         case Nil => soFar
       }
@@ -28,7 +29,7 @@ case class AccountAndTransactions(account: Account, transactions: Set[Transactio
           dateAmount.date.isBefore(now)
         }
         .map { _ =>
-          dateAmounts :+ DateAmount(now, zero)
+          dateAmounts :+ DateAmount(now, Amount(0))
         }
         .getOrElse {
           dateAmounts
@@ -69,5 +70,5 @@ case class AccountAndTransactions(account: Account, transactions: Set[Transactio
 
   val latestTransaction: Transaction = transactionSeq.maxBy(_.date.toString)
 
-  val balance: Amount = Amount.sum(transactionSeq.map(_.amount) :+ account.originalBalance)
+  val balance: Amount = combineAll(transactionSeq.map(_.amount) :+ account.originalBalance)
 }
